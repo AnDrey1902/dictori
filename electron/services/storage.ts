@@ -94,7 +94,7 @@ const DEFAULT_DICTIONARY: CustomWord[] = [
 
 const DEFAULT_SNIPPETS: TextSnippet[] = [
   { id: '1', trigger: 'мой имейл', replacement: 'my.email@example.com', description: 'Вставка личного email' },
-  { id: '2', trigger: 'мой телефон', replacement: '+7 (999) 000-00-00', description: 'Вставка номера телефона' },
+  { id: '2', trigger: 'мой телефон', replacement: '+1 (987) 654-32-10', description: 'Вставка номера телефона' },
   { id: '3', trigger: 'шапка письма', replacement: 'Здравствуйте!\n\nСпасибо за обращение.', description: 'Шаблон приветствия' },
   { id: '4', trigger: 'хорошего дня', replacement: 'С уважением,\nХорошего вам дня!', description: 'Вежливая подпись' }
 ];

@@ -188,7 +188,7 @@ export interface SpeakyAPI {
   downloadModel: (modelId: string) => Promise<{ ok: boolean; error?: string }>;
   removeModel: (modelId: string) => Promise<{ ok: boolean; error?: string }>;
   onModelProgress: (callback: (ev: ModelProgressEvent) => void) => () => void;
-  pickModelFolder: () => Promise<{ path: string; suggestedName: string; detectedEngine?: ModelEngine } | null>;
+  pickModelFolder: (shape?: 'file' | 'folder') => Promise<{ path: string; suggestedName: string; detectedEngine?: ModelEngine } | null>;
   checkHotkey: (accelerator: string) => Promise<{ available: boolean; error?: string }>;
   registerCustomModel: (model: CustomLocalModel) => Promise<{ ok: boolean; error?: string }>;
   unregisterCustomModel: (modelId: string) => Promise<{ ok: boolean; error?: string }>;

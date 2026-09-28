@@ -10,9 +10,18 @@
   --border-subtle: rgba(63, 63, 70, 0.6);
   --border-strong: rgba(82, 82, 91, 0.9);
   --text-primary: #f4f4f5;    /* zinc-100 */
-  --text-secondary: #71717a;  /* zinc-500 */
+  --text-secondary: #a1a1aa;  /* zinc-400 — raised from zinc-500 for readability */
   --accent: #6366f1;          /* indigo-500 */
   --accent-soft: #818cf8;     /* indigo-400 */
+}
+
+/* UI readability: everything ~17% larger, explanations more contrasty */
+.settings-shell {
+  font-size: 117%;
+}
+.settings-shell .text-zinc-500,
+.settings-shell .text-zinc-400 {
+  color: #b4b4bd;
 }
 
 html,

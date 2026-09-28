@@ -35,7 +35,7 @@ const api = {
     ipcRenderer.on('model:progress', handler);
     return () => ipcRenderer.removeListener('model:progress', handler);
   },
-  pickModelFolder: () => ipcRenderer.invoke('models:pick-folder'),
+  pickModelFolder: (shape?: 'file' | 'folder') => ipcRenderer.invoke('models:pick-folder', shape),
   registerCustomModel: (model: any): Promise<{ ok: boolean; error?: string }> =>
     ipcRenderer.invoke('models:register-custom', model),
   unregisterCustomModel: (modelId: string): Promise<{ ok: boolean; error?: string }> =>

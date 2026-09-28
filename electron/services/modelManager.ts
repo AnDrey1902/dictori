@@ -8,13 +8,34 @@ import { storage } from './storage';
 export { MODEL_CATALOG, getCatalogEntry };
 
 /**
- * Speaky local model manager (whisper.cpp edition).
- * Models are single-file ggml checkpoints downloaded directly from HuggingFace
- * into userData/models/whisper.cpp/. The engine binary itself ships with the
- * app (resources/whisper) — nothing to install, no Python.
+ * Speaky local model manager.
+ * Models are single-file ggml/gguf checkpoints downloaded directly from HuggingFace
+ * into <exeDir>/models (or userData/models as fallback). The engine binary itself ships
+ * with the app (resources/transcribe) — nothing to install, no Python.
  */
 
+/**
+ * Speaky local model manager.
+ * Models are single-file ggml/gguf checkpoints downloaded directly from
+ * HuggingFace. Install location: next to the app itself (<exeDir>/models),
+ * so a D:\ install keeps its models on D:. Falls back to userData/models
+ * when the app dir is not writable (e.g. Program Files).
+ */
 export function getModelsDir(): string {
+  // Prefer the directory containing the running executable (install dir)
+  try {
+    const exeDir = path.dirname(app.getPath('exe'));
+    // unpacked dev runs from node_modules/electron/dist — keep models in userData there
+    const isDev = !app.isPackaged;
+    if (!isDev) {
+      const installModels = path.join(exeDir, 'models');
+      try {
+        fs.mkdirSync(installModels, { recursive: true });
+        fs.accessSync(installModels, fs.constants.W_OK);
+        return installModels;
+      } catch {}
+    }
+  } catch {}
   return path.join(app.getPath('userData'), 'models');
 }
 
@@ -81,6 +102,11 @@ function modelDir(entry: ModelCatalogEntry): string {
   return path.join(getModelsDir(), entry.engine, entry.id);
 }
 
+/** Pre-consolidation install location (whisper.cpp engine dir) — kept for soft migration */
+function legacyModelDir(entry: ModelCatalogEntry): string {
+  return path.join(getModelsDir(), 'whisper.cpp', entry.id);
+}
+
 function ggmlFileOf(entry: ModelCatalogEntry): string {
   return entry.hfFile || `${entry.id}.bin`;
 }
@@ -98,7 +124,10 @@ export function getInstalledModelEngine(modelId?: string): 'whisper.cpp' | 'tran
 export function isModelInstalled(entry: ModelCatalogEntry): boolean {
   try {
     const file = path.join(modelDir(entry), ggmlFileOf(entry));
-    return fs.existsSync(file) && fs.statSync(file).size > 1024 * 1024;
+    if (fs.existsSync(file) && fs.statSync(file).size > 1024 * 1024) return true;
+    // Soft migration: accept models installed under the legacy whisper.cpp dir
+    const legacy = path.join(legacyModelDir(entry), ggmlFileOf(entry));
+    return fs.existsSync(legacy) && fs.statSync(legacy).size > 1024 * 1024;
   } catch {
     return false;
   }
@@ -106,14 +135,22 @@ export function isModelInstalled(entry: ModelCatalogEntry): boolean {
 
 /** Absolute path to the ggml model file if installed */
 export function getInstalledModelPath(modelId?: string): string | undefined {
+  const resolveFor = (entry: ModelCatalogEntry): string | undefined => {
+    const current = path.join(modelDir(entry), ggmlFileOf(entry));
+    if (fs.existsSync(current)) return current;
+    const legacy = path.join(legacyModelDir(entry), ggmlFileOf(entry));
+    if (fs.existsSync(legacy)) return legacy;
+    return undefined;
+  };
+
   const entry = modelId ? getCatalogEntry(modelId) : undefined;
   if (entry && isModelInstalled(entry)) {
-    return path.join(modelDir(entry), ggmlFileOf(entry));
+    return resolveFor(entry);
   }
   // Fall back to any installed catalog model
   for (const e of MODEL_CATALOG) {
     if (isModelInstalled(e)) {
-      return path.join(modelDir(e), ggmlFileOf(e));
+      return resolveFor(e);
     }
   }
   return undefined;
@@ -121,13 +158,13 @@ export function getInstalledModelPath(modelId?: string): string | undefined {
 
 export function getCatalogStatus(): InstalledModelInfo[] {
   const catalog = MODEL_CATALOG.map((entry) => {
-    const dir = modelDir(entry);
     const installed = isModelInstalled(entry);
+    const file = installed ? getInstalledModelPath(entry.id) : undefined;
     return {
       ...entry,
       installed,
-      path: installed ? path.join(dir, ggmlFileOf(entry)) : undefined,
-      sizeOnDiskMB: installed ? Math.round(fs.statSync(path.join(dir, ggmlFileOf(entry))).size / 1048576) : undefined
+      path: file,
+      sizeOnDiskMB: file ? Math.round(fs.statSync(file).size / 1048576) : undefined
     };
   });
 
@@ -163,9 +200,9 @@ function listFilesShallow(dir: string): string[] {
 export function detectEngineFromFolder(dir: string): ModelEngine | undefined {
   const files = listFilesShallow(dir);
   if (files.length === 0) return undefined;
-  // Single-file model: ggml (whisper.cpp) or gguf (transcribe.cpp)
+  // Single-file model: both ggml (.bin) and gguf (.gguf) run on transcribe.cpp
   if (files.some((f) => f.endsWith('.gguf'))) return 'transcribe.cpp';
-  if (files.some((f) => f.endsWith('.bin'))) return 'whisper.cpp';
+  if (files.some((f) => f.endsWith('.bin'))) return 'transcribe.cpp';
   return undefined;
 }
 
@@ -180,8 +217,8 @@ export function validateModelFolder(dir: string): { ok: boolean; error?: string;
   if (stat.isFile()) {
     const lower = dir.toLowerCase();
     if (lower.endsWith('.gguf')) return { ok: true, engine: 'transcribe.cpp' };
-    if (lower.endsWith('.bin')) return { ok: true, engine: 'whisper.cpp' };
-    return { ok: false, error: 'Нужен файл *.gguf (transcribe.cpp) или *.bin (whisper.cpp)' };
+    if (lower.endsWith('.bin')) return { ok: true, engine: 'transcribe.cpp' };
+    return { ok: false, error: 'Нужен файл *.gguf или *.bin (transcribe.cpp)' };
   }
   if (!stat.isDirectory()) return { ok: false, error: 'Выбранный путь — не папка' };
 
@@ -191,10 +228,10 @@ export function validateModelFolder(dir: string): { ok: boolean; error?: string;
   if (!hasGguf && !hasGgml) {
     return {
       ok: false,
-      error: 'Не удалось определить модель. Нужен файл *.gguf (transcribe.cpp) или *.bin (whisper.cpp)'
+      error: 'Не удалось определить модель. Нужен файл *.gguf или *.bin (transcribe.cpp)'
     };
   }
-  return { ok: true, engine: hasGguf ? 'transcribe.cpp' : 'whisper.cpp' };
+  return { ok: true, engine: 'transcribe.cpp' };
 }
 
 export function registerCustomModel(model: CustomLocalModel): { ok: boolean; error?: string } {

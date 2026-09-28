@@ -17,6 +17,9 @@ import {
   Loader2,
   FolderPlus,
   Pencil,
+  FileAudio,
+  Folder,
+  ArrowRight,
   Languages as LanguagesIcon
 } from 'lucide-react';
 import { getTranslations } from '../../utils/i18n';
@@ -109,12 +112,15 @@ export const ModelsTab: React.FC<ModelsTabProps> = ({ settings, onChange }) => {
   } | null>(null);
   const [draftName, setDraftName] = useState('');
 
-  const handlePickFolder = async () => {
+  const [shapeChooser, setShapeChooser] = useState(false);
+
+  const handlePickFolder = async (shape: 'file' | 'folder') => {
+    setShapeChooser(false);
     setModelError(null);
-    const res = await window.speakyAPI?.pickModelFolder?.();
+    const res = await window.speakyAPI?.pickModelFolder?.(shape);
     if (!res) return;
     if (!res.detectedEngine) {
-      setModelError('Не удалось определить модель: нужен файл *.gguf (transcribe.cpp) или *.bin (whisper.cpp), либо папка с таким файлом');
+      setModelError('Не удалось определить модель: нужен файл *.gguf или *.bin (или папка с таким файлом)');
       return;
     }
     setDraftFolder(res);
@@ -128,7 +134,7 @@ export const ModelsTab: React.FC<ModelsTabProps> = ({ settings, onChange }) => {
       id,
       name: draftName.trim() || draftFolder.suggestedName,
       path: draftFolder.path,
-      engine: draftFolder.detectedEngine || 'whisper.cpp'
+      engine: draftFolder.detectedEngine || 'transcribe.cpp'
     });
     if (res && !res.ok) {
       setModelError(res.error || 'Ошибка подключения папки');
@@ -190,7 +196,7 @@ export const ModelsTab: React.FC<ModelsTabProps> = ({ settings, onChange }) => {
           <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
             <HardDrive className="w-3.5 h-3.5" /> {t.localModelsSection}
           </div>
-          <Button variant="secondary" onClick={handlePickFolder} title="Подключить уже скачанную модель из любой папки">
+          <Button variant="secondary" onClick={() => setShapeChooser(true)} title="Подключить уже скачанную модель из любой папки">
             <FolderPlus className="w-3.5 h-3.5 inline mr-1 -mt-0.5" />
             Из папки…
           </Button>
@@ -461,6 +467,60 @@ export const ModelsTab: React.FC<ModelsTabProps> = ({ settings, onChange }) => {
           </div>
         ) : null}
       </section>
+
+      {/* ── Shape chooser: styled replacement for the native dialog ── */}
+      {shapeChooser && (
+        <div
+          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center"
+          onClick={() => setShapeChooser(false)}
+        >
+          <div
+            className="w-[380px] rounded-2xl border border-zinc-700/80 bg-zinc-900 shadow-2xl shadow-black/50 p-5 space-y-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-lg bg-indigo-500/15 border border-indigo-500/40 flex items-center justify-center text-indigo-300">
+                <FolderPlus className="w-4.5 h-4.5" />
+              </div>
+              <div>
+                <div className="text-sm font-semibold text-zinc-100">Подключение модели</div>
+                <div className="text-xs text-zinc-400">Один файл модели или папка, в которой он лежит.</div>
+              </div>
+            </div>
+
+            <button
+              onClick={() => handlePickFolder('file')}
+              className="w-full flex items-center gap-3 p-3.5 rounded-xl border border-zinc-700/70 bg-zinc-800/50 hover:bg-zinc-800 hover:border-indigo-500/60 transition-all text-left cursor-pointer group"
+            >
+              <FileAudio className="w-4.5 h-4.5 text-zinc-400 group-hover:text-indigo-300 transition-colors shrink-0" />
+              <div className="flex-1">
+                <div className="text-xs font-semibold text-zinc-100">Файл модели</div>
+                <div className="text-[11px] text-zinc-400">*.gguf или *.bin</div>
+              </div>
+              <ArrowRight className="w-4 h-4 text-zinc-600 group-hover:text-indigo-300 group-hover:translate-x-0.5 transition-all" />
+            </button>
+
+            <button
+              onClick={() => handlePickFolder('folder')}
+              className="w-full flex items-center gap-3 p-3.5 rounded-xl border border-zinc-700/70 bg-zinc-800/50 hover:bg-zinc-800 hover:border-indigo-500/60 transition-all text-left cursor-pointer group"
+            >
+              <Folder className="w-4.5 h-4.5 text-zinc-400 group-hover:text-indigo-300 transition-colors shrink-0" />
+              <div className="flex-1">
+                <div className="text-xs font-semibold text-zinc-100">Папка с моделью</div>
+                <div className="text-[11px] text-zinc-400">модель внутри папки</div>
+              </div>
+              <ArrowRight className="w-4 h-4 text-zinc-600 group-hover:text-indigo-300 group-hover:translate-x-0.5 transition-all" />
+            </button>
+
+            <button
+              onClick={() => setShapeChooser(false)}
+              className="w-full py-2 text-xs text-zinc-500 hover:text-zinc-200 transition-colors cursor-pointer"
+            >
+              Отмена
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

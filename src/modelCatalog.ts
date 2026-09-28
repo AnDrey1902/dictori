@@ -2,9 +2,10 @@ import { ModelCatalogEntry } from './types';
 
 /**
  * Shared catalog of local speech models (renderer + main process).
- * Two engines, both bundled with the app, no Python:
- *  - whisper.cpp  → ggml/*.bin via bundled whisper-cli.exe (one process per dictation)
- *  - transcribe.cpp → GGUF via bundled transcribe.dll (worker thread, model stays in RAM)
+ * Single engine, bundled with the app, no Python:
+ *  - transcribe.cpp → gguf/ggml models via bundled transcribe.dll
+ *    (worker thread, model stays in RAM). Whisper-family models are
+ *    pinned to CPU — the Vulkan backend mis-decodes that model family.
  * All models are single files downloaded straight from HuggingFace.
  */
 export const MODEL_CATALOG: ModelCatalogEntry[] = [
@@ -44,24 +45,13 @@ export const MODEL_CATALOG: ModelCatalogEntry[] = [
   {
     id: 'whisper-small-q5',
     name: 'Whisper Small (q5_1)',
-    engine: 'whisper.cpp',
+    engine: 'transcribe.cpp',
     huggingfaceId: 'ggerganov/whisper.cpp',
     hfFile: 'ggml-small-q5_1.bin',
     languages: ['multi'],
     sizeMB: 181,
-    description: 'Запасной вариант whisper.cpp: работает только на CPU и заметно медленнее GigaAM/Parakeet (модель читается с диска при каждой диктовке).',
-    requires: 'whisper.cpp'
-  },
-  {
-    id: 'whisper-base-q5',
-    name: 'Whisper Base (q5_1)',
-    engine: 'whisper.cpp',
-    huggingfaceId: 'ggerganov/whisper.cpp',
-    hfFile: 'ggml-base-q5_1.bin',
-    languages: ['multi'],
-    sizeMB: 57,
-    description: 'Минимальный размер для быстрой проверки локального режима; тоже CPU-only, точность ниже.',
-    requires: 'whisper.cpp'
+    description: 'Мультиязычная (~99 языков) на едином движке transcribe.cpp. CPU-only: Vulkan-бэкенд искажает whisper-модели. Модель постоянно в RAM — без чтения с диска при каждой диктовке.',
+    requires: 'transcribe.cpp'
   }
 ];
 

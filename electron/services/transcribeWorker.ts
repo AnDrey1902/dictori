@@ -51,10 +51,13 @@ const backendEnv = (process.env.SPEAKY_TC_BACKEND || '').toLowerCase();
 // it — so whisper GGUF models are pinned to CPU (slower but correct),
 // everything else uses AUTO. SPEAKY_TC_BACKEND=cpu|vulkan overrides for tests.
 // Must be evaluated per-open (model file is only known when 'open' arrives).
-function resolveBackendRequest(modelFile: string): number {
+function resolveBackendRequest(modelFile: string, modelPath: string): number {
   if (backendEnv === 'cpu') return 1;
   if (backendEnv === 'vulkan') return 3;
-  return /whisper/i.test(modelFile) ? 1 : 0;
+  // Whisper-family detection must cover ALL real-world names: ggml-small-q5_1.bin,
+  // ggml-base-q5_1.bin, whisper-large-v3-turbo-*.gguf — 'whisper' only matches the latter.
+  const isWhisperFamily = /whisper|ggml-|\/whisper\.cpp\\|whisper\.cpp/i.test(modelFile + ' ' + modelPath);
+  return isWhisperFamily ? 1 : 0;
 }
 // Native sizeof query: safer than *_init() (which koffi trips over on pointer
 // out-fields). struct_size >= known-field prefix is accepted by the library.
@@ -99,7 +102,7 @@ parentPort!.on('message', (msg: any) => {
         return;
       }
       if (session) { closeFn(session); session = null; }
-      const backendRequest = resolveBackendRequest(file);
+      const backendRequest = resolveBackendRequest(file, modelPath);
       let loadParams: any = null;
       if (backendRequest !== 0) {
         loadParams = { struct_size: Number(abiSizeFn(0)), backend: backendRequest, device: null };

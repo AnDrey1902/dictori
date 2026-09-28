@@ -116,6 +116,26 @@ export function isKeyHeld(vKey: number): boolean {
   }
 }
 
+/**
+ * Release physically-held modifier keys (Ctrl/Alt/Shift/Win) via synthetic KEYUP.
+ * Needed when a global hotkey fires while its own modifiers are still held:
+ * e.g. Ctrl+Alt+Space → emulated Ctrl+C becomes Ctrl+Alt+C and the target app
+ * never copies. Idempotent — releases only keys that are actually down.
+ */
+export function releaseHeldModifiers(): void {
+  if (process.platform !== 'win32' || !keybd_event) return;
+  try {
+    for (const vk of [VK.CONTROL, VK.MENU, VK.SHIFT, VK.LWIN, VK.RWIN]) {
+      if (isKeyHeld(vk)) {
+        keybd_event(vk, 0, KEYEVENTF_KEYUP, 0);
+      }
+    }
+    // Let the OS settle modifier state before we send further synthetic input
+  } catch (err) {
+    console.warn('[Platform] releaseHeldModifiers error:', err);
+  }
+}
+
 export function isHotkeyTriggerHeld(hotkey = 'Ctrl+Space'): boolean {
   if (process.platform !== 'win32' || !GetAsyncKeyState) {
     return false;

@@ -17,7 +17,7 @@ import path from 'path';
 import fs from 'fs';
 import { storage } from './services/storage';
 import { detectActiveContext } from './services/contextDetector';
-import { injectTextUnicode, simulateCopy, rememberForegroundWindow } from './services/win32';
+import { injectTextUnicode, simulateCopy, rememberForegroundWindow, releaseHeldModifiers } from './services/win32';
 import { transcribeAudio } from './services/sttService';
 import { checkLocalWhisperAvailable } from './services/localWhisper';
 import { cleanTextRules, refineTextWithLLM, translateTextWithLLM } from './services/llmProcessor';
@@ -461,6 +461,11 @@ async function captureActiveSelection(): Promise<string> {
 
   try {
     clipboard.clear();
+    // If this hotkey's own modifiers (e.g. Alt on Ctrl+Alt+Space) are still held,
+    // the target app receives Ctrl+Alt+C instead of Ctrl+C — release them first.
+    releaseHeldModifiers();
+    // Let the OS settle the modifier state before sending the synthetic copy
+    await new Promise((r) => setTimeout(r, 40));
     simulateCopy();
 
     // Small delay for target app to copy selection; one retry for slow apps
@@ -470,6 +475,7 @@ async function captureActiveSelection(): Promise<string> {
       await new Promise((r) => setTimeout(r, 150));
       copied = clipboard.readText();
       if (!copied || copied.trim().length === 0) {
+        console.warn('[Selection] No text captured after Ctrl+C — target app may not support clipboard copy');
         writeBack(); // nothing captured — restore user's clipboard immediately
         return '';
       }
@@ -692,6 +698,7 @@ function registerTranslateHotkey() {
         (async () => {
           try {
             const selected = await captureActiveSelection();
+            console.log(`[Translate] Hotkey fired: captured ${selected ? selected.length : 0} chars of selection`);
             if (selected && selected.trim().length > 0) {
               if (hudWindow && !hudWindow.isDestroyed() && hudWindow.isVisible()) {
                 hudWindow.hide();
@@ -830,21 +837,12 @@ function setupIpcHandlers() {
   });
   ipcMain.handle('models:check-engine', () => ({ available: true }));
 
-  ipcMain.handle('models:pick-folder', async () => {
+  ipcMain.handle('models:pick-folder', async (_event, shape?: 'file' | 'folder') => {
     const win = settingsWindow || BrowserWindow.getFocusedWindow() || undefined;
     // Windows quirk: openFile+openDirectory together = folder-tree dialog where
-    // files are unclickable. Ask the user which shape they have, then open the
-    // matching dialog. If they cancel the shape prompt, default to file.
-    const shape = await dialog.showMessageBox(win as any, {
-      type: 'question',
-      buttons: ['Файл модели (*.gguf / *.bin)', 'Папка с моделью'],
-      defaultId: 0,
-      cancelId: 0,
-      title: 'Подключение модели',
-      message: 'Что подключаем?',
-      detail: 'Один файл модели или папка, в которой он лежит.'
-    });
-    const wantFolder = shape.response === 1;
+    // files are unclickable. The renderer shows its own styled shape chooser
+    // and passes the choice here ('file' | 'folder'); defaults to file.
+    const wantFolder = shape === 'folder';
     const res = wantFolder
       ? await dialog.showOpenDialog(win as any, {
           title: 'Выберите папку с моделью (*.gguf, *.bin внутри)',

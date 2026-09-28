@@ -139,14 +139,14 @@ export const SettingsView: React.FC = () => {
   return (
     <div className="settings-shell w-screen h-screen flex flex-col bg-zinc-950 text-zinc-100 overflow-hidden font-sans select-none">
       {/* Titlebar */}
-      <div className="h-11 bg-zinc-950 border-b border-zinc-800/80 flex items-center justify-between px-5 shrink-0 app-drag-region">
-        <div className="flex items-center gap-2.5">
-          <SpeakyLogo className="w-5 h-5" />
-          <span className="text-xs font-semibold tracking-tight text-zinc-100">
+      <div className="h-14 bg-zinc-950 border-b border-zinc-800/80 flex items-center justify-between px-5 shrink-0 app-drag-region">
+        <div className="flex items-center gap-3.5">
+          <SpeakyLogo className="w-10 h-10" />
+          <span className="text-2xl font-bold tracking-tight text-zinc-100">
             {BRAND.wordmark}
           </span>
           {savedBadge && (
-            <span className="text-[10px] text-indigo-300 font-medium bg-indigo-500/10 border border-indigo-500/30 px-2 py-0.5 rounded-full">
+            <span className="text-xs text-indigo-300 font-medium bg-indigo-500/10 border border-indigo-500/30 px-2.5 py-1 rounded-full">
               {t.saved}
             </span>
           )}

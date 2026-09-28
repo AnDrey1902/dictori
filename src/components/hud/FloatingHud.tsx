@@ -29,6 +29,18 @@ export const FloatingHud: React.FC = () => {
   const [appMode, setAppMode] = useState<'toggle' | 'ptt'>('toggle');
   const [savedMacroInfo, setSavedMacroInfo] = useState<{ trigger: string; replacement: string } | null>(null);
   const [dictationMode, setDictationMode] = useState<DictationMode>('dictation');
+  // Mirror of dictationMode reachable from []-deps listeners (stale-closure guard):
+  // hotkey handlers must always see the mode the current recording was started with.
+  const dictationModeRef = useRef<DictationMode>('dictation');
+
+  useEffect(() => {
+    dictationModeRef.current = dictationMode;
+  }, [dictationMode]);
+
+  const applyDictationMode = (mode: DictationMode) => {
+    dictationModeRef.current = mode;
+    setDictationMode(mode);
+  };
 
   const t = getTranslations(uiLanguage);
 
@@ -48,6 +60,7 @@ export const FloatingHud: React.FC = () => {
   }, [hudState]);
 
   const handleToggleRecordingRef = useRef<() => void>(() => {});
+  const stopRecordingActionRef = useRef<() => void>(() => {});
 
   const cancelDismiss = () => {
     if (dismissTimerRef.current) {
@@ -138,7 +151,7 @@ export const FloatingHud: React.FC = () => {
       const arrayBuffer = await audioBlob.arrayBuffer();
 
       if (window.speakyAPI) {
-        const result = await window.speakyAPI.transcribeAudio(arrayBuffer, audioBlob.type, dictationMode);
+        const result = await window.speakyAPI.transcribeAudio(arrayBuffer, audioBlob.type, dictationModeRef.current);
 
         if (result.success && result.text) {
           soundEffects.playSuccess();
@@ -246,6 +259,7 @@ export const FloatingHud: React.FC = () => {
   };
 
   handleToggleRecordingRef.current = handleToggleRecording;
+  stopRecordingActionRef.current = stopRecordingAction;
 
   useEffect(() => {
     if (!window.speakyAPI) return;
@@ -282,15 +296,21 @@ export const FloatingHud: React.FC = () => {
 
     const unsubHotkey = window.speakyAPI.onTriggerRecording((action: string) => {
       if (action === 'toggle') {
-        if (hudStateRef.current !== 'recording') setDictationMode('dictation');
+        if (hudStateRef.current !== 'recording') applyDictationMode('dictation');
         handleToggleRecordingRef.current();
       } else if (action === 'translate') {
-        setDictationMode('translate');
-        startRecordingAction();
+        // Unified with dictation: pressing the translate hotkey while recording
+        // finishes and processes the recording instead of being ignored.
+        if (hudStateRef.current === 'recording' || isRecordingRef.current) {
+          stopRecordingActionRef.current();
+        } else {
+          applyDictationMode('translate');
+          startRecordingAction();
+        }
       } else if (action === 'start') {
         startRecordingAction();
       } else if (action === 'stop') {
-        stopRecordingAction();
+        stopRecordingActionRef.current();
       } else if (action === 'show') {
         cancelDismiss();
         setIsVisible(true);

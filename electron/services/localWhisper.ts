@@ -42,14 +42,13 @@ function resolveModel(
   if (custom) {
     const file = resolveCustomModelFile(custom);
     if (file) {
-      // Custom gguf files run on transcribe.cpp; legacy .bin on whisper.cpp
-      const isGguf = file.toLowerCase().endsWith('.gguf');
-      return { file, engine: isGguf ? 'transcribe.cpp' : 'whisper.cpp' };
+      // Single engine: both gguf and ggml (.bin) run on transcribe.cpp
+      return { file, engine: 'transcribe.cpp' };
     }
   }
   const installed = getInstalledModelPath(modelId);
   if (installed) {
-    const engine = getInstalledModelEngine(modelId) || 'whisper.cpp';
+    const engine = getInstalledModelEngine(modelId) || 'transcribe.cpp';
     return { file: installed, engine };
   }
   return undefined;
