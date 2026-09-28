@@ -27,8 +27,13 @@ export function cleanTextRules(text: string, context: ActiveContext): string {
       cleaned = cleaned.replace(pattern, '');
     }
 
-    // Verbal self-correction e.g. "в пять, ой нет, в шесть" -> "в шесть"
-    cleaned = cleaned.replace(/(?<![а-яёa-z0-9])([а-яёa-z0-9]+)[,\s]+(?:ой\s+нет|ой|не|вернее|точнее)[,\s]+([а-яёa-z0-9]+)(?![а-яёa-z0-9])/gi, '$2');
+    // Verbal self-correction e.g. "в пять, ой нет, в шесть" -> "в шесть".
+    // ONLY explicit correction markers — a bare "не" is normal negation
+    // ("не самая большая") and must never trigger deletion.
+    cleaned = cleaned.replace(/(?<![а-яёa-z0-9])([а-яёa-z0-9]+)[,\s]+(?:ой\s+нет|ой|вернее|точнее)[,\s]+(?=[а-яёa-z0-9])/gi, '');
+    // Collapse preposition duplicated by the correction ("в в шесть" -> "в шесть").
+    // \b is Cyrillic-blind in JS — use explicit Unicode letter lookarounds.
+    cleaned = cleaned.replace(/(?<![\p{L}\p{N}])([а-яёa-z]{1,2})\s+\1(?![\p{L}\p{N}])/giu, '$1');
   }
 
   // 3. User Snippets replacement
