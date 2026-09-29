@@ -136,6 +136,17 @@ export const I18N = {
     hudStateSuccess: 'Успех',
     hudTestLabel: 'Тест HUD:',
 
+    // Onboarding (first-run model picker)
+    onboardingTitle: 'Настройка Dictori',
+    onboardingSubtitle: 'Выберите модели распознавания, чтобы скачать их сейчас — позже можно добавить или удалить в разделе «Модели». Или начните с облака Groq (бесплатно, нужен API-ключ).',
+    onboardingCloudTitle: 'Начать с Groq Cloud',
+    onboardingCloudDesc: 'Самый быстрый вариант: работает сразу после добавления бесплатного API-ключа (console.groq.com/keys).',
+    onboardingLocalSection: 'Локальные модели (офлайн, приватно)',
+    onboardingHint: 'Модели хранятся в папке приложения и работают без интернета.',
+    onboardingDownload: 'Скачать выбранные модели',
+    onboardingSkip: 'Решить позже',
+    onboardingFinish: 'Готово',
+
     // Models Tab
     modelsTitle: 'Модели распознавания',
     modelsSubtitle: 'Оптимальный комплект отобранных моделей: баланс скорости и качества закрывает большинство задач. Облако (Groq) — когда нужны максимальные скорость и точность, локальные модели — когда голос должен оставаться на компьютере.',
@@ -392,6 +403,17 @@ export const I18N = {
     hudStateProcessing: 'Processing',
     hudStateSuccess: 'Success',
     hudTestLabel: 'HUD test:',
+
+    // Onboarding (first-run model picker)
+    onboardingTitle: 'Set up Dictori',
+    onboardingSubtitle: 'Choose the speech models to download now — you can add or remove them later in Models. Or start with the Groq cloud (free, needs an API key).',
+    onboardingCloudTitle: 'Start with Groq Cloud',
+    onboardingCloudDesc: 'Fastest option: works right away after adding a free API key (console.groq.com/keys).',
+    onboardingLocalSection: 'Local models (offline, private)',
+    onboardingHint: 'Models are stored in the app folder and work without internet.',
+    onboardingDownload: 'Download selected models',
+    onboardingSkip: 'Decide later',
+    onboardingFinish: 'Done',
 
     // Models Tab
     modelsTitle: 'Speech models',

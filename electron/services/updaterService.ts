@@ -7,6 +7,9 @@ import https from 'https';
 import { spawn } from 'child_process';
 import { getJson } from './httpClient';
 
+/** Single source of truth for the app version (package.json) */
+const APP_VERSION: string = (require('../../package.json') as { version: string }).version || '1.2.0';
+
 export type UpdateStatus =
   | 'idle'
   | 'checking'
@@ -27,7 +30,7 @@ export interface UpdateInfoState {
 
 let updateState: UpdateInfoState = {
   status: 'idle',
-  version: '1.1.0'
+  version: APP_VERSION
 };
 
 let downloadedInstallerPath: string | null = null;
@@ -114,6 +117,7 @@ async function fetchLatestGitHubRelease(): Promise<{
   };
 }
 
+/** Resume-aware installer download: Range-based resume from .part, retry with backoff (same policy as model downloads) */
 function streamDownload(
   urlStr: string,
   fileName: string,
@@ -125,53 +129,92 @@ function streamDownload(
   }
 
   const destPath = path.join(updateDir, fileName);
+  const partPath = destPath + '.part';
+  const MAX_ATTEMPTS = 8;
 
   return new Promise((resolve, reject) => {
-    function downloadStep(currentUrl: string, redirectCount = 0) {
-      if (redirectCount > 6) {
-        return reject(new Error('Слишком много перенаправлений'));
+    let attemptIndex = 0;
+
+    function failOver(err: Error) {
+      const tryIndex = attemptIndex + 1;
+      if (tryIndex >= MAX_ATTEMPTS) {
+        return reject(new Error(`Скачивание не удалось после ${MAX_ATTEMPTS} попыток: ${err?.message || 'ошибка сети'}`));
       }
-      try {
-        const u = new URL(currentUrl);
-        const transport = u.protocol === 'http:' ? http : https;
-        const req = transport.get(
-          currentUrl,
-          { headers: { 'User-Agent': 'dictori-desktop' } },
-          (res) => {
+      // Backoff before retry: 2s, 4s, 8s... capped at 30s; resume from .part size
+      const delay = Math.min(30000, 2000 * Math.pow(2, tryIndex - 1));
+      setTimeout(() => {
+        attemptIndex = tryIndex;
+        start(tryIndex);
+      }, delay);
+    }
+
+    function start(tryIndex: number) {
+      const offset = fs.existsSync(partPath) ? fs.statSync(partPath).size : 0;
+
+      function downloadStep(currentUrl: string, redirectCount: number) {
+        if (redirectCount > 6) {
+          return failOver(new Error('Слишком много перенаправлений'));
+        }
+        try {
+          const u = new URL(currentUrl);
+          const transport = u.protocol === 'http:' ? http : https;
+          const headers: Record<string, string> = { 'User-Agent': 'dictori-desktop' };
+          if (offset > 0) {
+            headers['Range'] = `bytes=${offset}-`;
+          }
+          const req = transport.get(currentUrl, { headers }, (res) => {
             if (res.statusCode && res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
               return downloadStep(res.headers.location, redirectCount + 1);
             }
             if (res.statusCode && (res.statusCode < 200 || res.statusCode >= 300)) {
-              return reject(new Error(`Ошибка загрузки: HTTP ${res.statusCode}`));
+              return failOver(new Error(`Ошибка загрузки: HTTP ${res.statusCode}`));
+            }
+
+            // Server ignored Range — restart the part file from scratch
+            const resumed = res.statusCode === 206 && offset > 0;
+            const base = resumed ? offset : 0;
+            if (!resumed && offset > 0) {
+              try { fs.truncateSync(partPath, 0); } catch {}
             }
 
             const totalBytes = Number(res.headers['content-length']) || 88000000;
-            let receivedBytes = 0;
-            const fileStream = fs.createWriteStream(destPath);
+            const expectedTotal = base + totalBytes;
+            let receivedBytes = base;
+            const fileStream = fs.createWriteStream(partPath, { flags: resumed ? 'a' : 'w' });
+            let settled = false;
+
+            const finishOnce = () => {
+              if (settled) return;
+              settled = true;
+              try { fs.renameSync(partPath, destPath); } catch {}
+              onProgress(100);
+              resolve(destPath);
+            };
 
             res.on('data', (chunk: Buffer) => {
               receivedBytes += chunk.length;
-              if (totalBytes > 0) {
-                const percent = Math.min(99, Math.round((receivedBytes / totalBytes) * 100));
+              if (expectedTotal > 0) {
+                const percent = Math.min(99, Math.round((receivedBytes / expectedTotal) * 100));
                 onProgress(percent);
               }
             });
 
-            fileStream.on('finish', () => {
-              onProgress(100);
-              resolve(destPath);
-            });
-            fileStream.on('error', (err) => reject(err));
-            res.on('error', (err) => reject(err));
+            fileStream.on('finish', finishOnce);
+            fileStream.on('error', (err) => { try { fileStream.close(); } catch {} failOver(err); });
+            res.on('error', (err) => failOver(err));
             res.pipe(fileStream);
-          }
-        );
-        req.on('error', reject);
-      } catch (err) {
-        reject(err);
+          });
+          req.on('error', (err) => failOver(err));
+        } catch (err) {
+          failOver(err as Error);
+        }
       }
+
+      downloadStep(urlStr, 0);
     }
-    downloadStep(urlStr);
+
+    attemptIndex = 0;
+    start(0);
   });
 }
 
@@ -179,9 +222,9 @@ export function initAutoUpdater(
   getSettingsWin: () => BrowserWindow | null,
   opts: { autoCheckDisabled?: boolean } = {}
 ) {
-  // In dev / unpackaged mode, display the package version so the card in
-  // Settings looks sane; in production packaged mode, official app.getVersion().
-  const currentVer = app.isPackaged ? (app.getVersion() || '1.1.0') : '1.1.0';
+  // app.getVersion() reads version from the packaged app metadata; in dev it
+  // falls back to the Electron binary version, so use package.json directly.
+  const currentVer = app.isPackaged ? (app.getVersion() || APP_VERSION) : APP_VERSION;
   updateState.version = currentVer;
 
   autoUpdater.logger = console;
@@ -278,7 +321,7 @@ export function initAutoUpdater(
         throw new Error('Не удалось получить данные релиза');
       }
 
-      const activeVer = app.isPackaged ? (app.getVersion() || '1.1.0') : '1.1.0';
+      const activeVer = app.isPackaged ? (app.getVersion() || APP_VERSION) : APP_VERSION;
       const hasUpdate = isVersionNewer(relInfo.latestVersion, activeVer);
 
       directDownloadUrl = relInfo.downloadUrl;

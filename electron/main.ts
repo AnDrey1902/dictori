@@ -190,6 +190,32 @@ const distHtml = path.join(__dirname, '../dist/index.html');
 const isDev = process.env.NODE_ENV === 'development';
 const VITE_DEV_URL = 'http://localhost:5173';
 
+/** Sentinel saved by saveHudPosition when the position is unknown/reset:
+ *  treat it like "no saved position" instead of pinning the HUD off-screen. */
+const HUD_POSITION_SENTINEL = -32000;
+
+function defaultHudPosition(): { x: number; y: number } {
+  // Bottom-center of the primary display, above the taskbar
+  const { bounds } = screen.getPrimaryDisplay();
+  return {
+    x: Math.round(bounds.x + (bounds.width - 520) / 2),
+    y: Math.round(bounds.y + bounds.height - 140 - 16)
+  };
+}
+
+/** Saved HUD position or undefined when unset/invalid (sentinel, off-screen) */
+function resolveSavedHudPosition(saved: { x: number; y: number } | undefined): { x: number; y: number } | undefined {
+  if (!saved || typeof saved.x !== 'number' || typeof saved.y !== 'number') return undefined;
+  if (saved.x === HUD_POSITION_SENTINEL || saved.y === HUD_POSITION_SENTINEL) return undefined;
+  // Reject positions fully outside every connected display (e.g. monitor unplugged)
+  const onScreen = screen.getAllDisplays().some((d) => {
+    const b = d.bounds;
+    return saved.x >= b.x - 60 && saved.x <= b.x + b.width + 60 && saved.y >= b.y - 20 && saved.y <= b.y + b.height + 60;
+  });
+  if (!onScreen) return undefined;
+  return saved;
+}
+
 function createHudWindow() {
   if (hudWindow && !hudWindow.isDestroyed()) {
     hudWindow.show();
@@ -197,21 +223,12 @@ function createHudWindow() {
     return;
   }
 
-  const primaryDisplay = screen.getPrimaryDisplay();
-  const { bounds } = primaryDisplay;
-
   const hudWidth = 520;
   const hudHeight = 140;
 
   const settings = storage.getSettings();
-  let x = settings.hudPosition?.x;
-  let y = settings.hudPosition?.y;
-
-  if (x === undefined || y === undefined || (x === 1452 && y === 952)) {
-    // Default position: centered horizontally at the bottom above taskbar
-    x = Math.round(bounds.x + (bounds.width - hudWidth) / 2);
-    y = Math.round(bounds.y + bounds.height - hudHeight - 16);
-  }
+  const saved = resolveSavedHudPosition(settings.hudPosition);
+  const { x, y } = saved || defaultHudPosition();
 
   hudWindow = new BrowserWindow({
     width: hudWidth,
@@ -543,17 +560,9 @@ function registerHotkeys() {
         }
 
         if (hudWindow && !hudWindow.isDestroyed()) {
-          let posX = currentSettings.hudPosition?.x;
-          let posY = currentSettings.hudPosition?.y;
+          const pos = resolveSavedHudPosition(currentSettings.hudPosition) || defaultHudPosition();
 
-          if (posX === undefined || posY === undefined || (posX === 1452 && posY === 952)) {
-            const primaryDisplay = screen.getPrimaryDisplay();
-            const { bounds } = primaryDisplay;
-            posX = Math.round(bounds.x + (bounds.width - 520) / 2);
-            posY = Math.round(bounds.y + bounds.height - 140 - 16);
-          }
-
-          hudWindow.setPosition(posX, posY);
+          hudWindow.setPosition(pos.x, pos.y);
           hudWindow.showInactive();
           hudWindow.setAlwaysOnTop(true, 'screen-saver');
           hudWindow.moveTop();
@@ -654,14 +663,8 @@ function showTranslateHud(): void {
   }
   if (hudWindow && !hudWindow.isDestroyed()) {
     const s = storage.getSettings();
-    const bounds = screen.getPrimaryDisplay().bounds;
-    let posX = s.hudPosition?.x;
-    let posY = s.hudPosition?.y;
-    if (posX === undefined || posY === undefined) {
-      posX = Math.round(bounds.x + (bounds.width - 520) / 2);
-      posY = Math.round(bounds.y + bounds.height - 140 - 16);
-    }
-    hudWindow.setPosition(posX, posY);
+    const pos = resolveSavedHudPosition(s.hudPosition) || defaultHudPosition();
+    hudWindow.setPosition(pos.x, pos.y);
     hudWindow.showInactive();
     hudWindow.setAlwaysOnTop(true, 'screen-saver');
     hudWindow.moveTop();
@@ -779,6 +782,7 @@ function setupIpcHandlers() {
   });
 
   ipcMain.handle('storage:get-settings', () => storage.getSettings());
+  ipcMain.handle('storage:is-fresh-install', () => storage.isFreshInstall());
   ipcMain.handle('storage:update-settings', (_event, newSettings) => {
     const updated = storage.updateSettings(newSettings);
     if (newSettings.hotkey || newSettings.mode) {

@@ -21,6 +21,7 @@ import { AppSettings, TextSnippet, DictationHistoryItem, PromptTemplate } from '
 import { DEFAULT_PROMPTS } from '../../defaultPrompts';
 import { getTranslations } from '../../utils/i18n';
 import { BRAND } from '../../brand';
+import { ModelOnboarding } from './ModelOnboarding';
 
 type TabId = 'models' | 'postprocess' | 'translate' | 'snippets' | 'history' | 'general' | 'about';
 
@@ -33,7 +34,6 @@ export const SettingsView: React.FC = () => {
     uiLanguage: 'auto',
     groqApiKey: '',
     openaiApiKey: '',
-    deepgramApiKey: '',
     selectedMicId: 'default',
     autoPunctuation: true,
     removeFillerWords: true,
@@ -47,6 +47,7 @@ export const SettingsView: React.FC = () => {
   const [history, setHistory] = useState<DictationHistoryItem[]>([]);
   const [prompts, setPrompts] = useState<PromptTemplate[]>([]);
   const [savedBadge, setSavedBadge] = useState(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
   const t = getTranslations(settings.uiLanguage);
 
@@ -57,7 +58,15 @@ export const SettingsView: React.FC = () => {
       setSettings((prev) => ({ ...prev, activePromptId: 'clean-default' }));
       return;
     }
-    window.speakyAPI.getSettings().then((s: AppSettings) => s && setSettings(s));
+    window.speakyAPI.getSettings().then(async (s: AppSettings) => {
+      if (!s) return;
+      setSettings(s);
+      // First-run wizard: only on clean installs — existing users updating the
+      // app must not see the model picker (s.onboardingDone covers upgrades
+      // from mid-cycle builds that already recorded it).
+      const fresh = await window.speakyAPI?.isFreshInstall?.();
+      if (!s.onboardingDone && fresh) setShowOnboarding(true);
+    });
     window.speakyAPI.getSnippets().then((sn: TextSnippet[]) => sn && setSnippets(sn));
     window.speakyAPI.getHistory().then((h: DictationHistoryItem[]) => h && setHistory(h));
     window.speakyAPI.getPrompts?.().then((p: PromptTemplate[]) => p && setPrompts(p));
@@ -194,6 +203,13 @@ export const SettingsView: React.FC = () => {
 
         {/* Content */}
         <div className="flex-1 p-8 overflow-y-auto bg-zinc-950">
+          {showOnboarding && (
+            <ModelOnboarding
+              settings={settings}
+              onChange={handleUpdateSettings}
+              onDone={() => setShowOnboarding(false)}
+            />
+          )}
           {activeTab === 'general' && (
             <GeneralTab settings={settings} onChange={handleUpdateSettings} />
           )}

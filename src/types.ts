@@ -1,5 +1,5 @@
 export type AppMode = 'toggle' | 'ptt';
-export type STTProvider = 'groq' | 'openai' | 'deepgram' | 'local';
+export type STTProvider = 'groq' | 'openai' | 'local';
 export type LLMProvider = 'groq' | 'openai' | 'gemini' | 'openai-compatible';
 export type DictationMode = 'dictation' | 'translate';
 export type AppCategory = 'code' | 'chat' | 'document' | 'browser' | 'terminal' | 'general';
@@ -27,7 +27,6 @@ export interface AppSettings {
   uiLanguage?: UILanguage;
   groqApiKey: string;
   openaiApiKey: string;
-  deepgramApiKey: string;
   selectedMicId: string;
   autoPunctuation: boolean;
   removeFillerWords: boolean;
@@ -66,6 +65,10 @@ export interface AppSettings {
   /** editable system prompt for translation */
   translatePrompt?: string;
   translateEnabled?: boolean;
+
+  /* ── First-run experience ── */
+  /** user already saw the first-run model picker wizard */
+  onboardingDone?: boolean;
 }
 
 /** Custom LLM prompt template for post-processing */
@@ -166,6 +169,8 @@ export type HudState = 'idle' | 'recording' | 'processing' | 'success' | 'error'
 
 export interface SpeakyAPI {
   getSettings: () => Promise<AppSettings>;
+  /** True when the app data file did not exist at startup (first launch) */
+  isFreshInstall?: () => Promise<boolean>;
   updateSettings: (settings: Partial<AppSettings>) => Promise<AppSettings>;
 
   getDictionary: () => Promise<CustomWord[]>;

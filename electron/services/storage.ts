@@ -59,7 +59,6 @@ const DEFAULT_SETTINGS: AppSettings = {
   uiLanguage: 'auto',
   groqApiKey: '',
   openaiApiKey: '',
-  deepgramApiKey: '',
   selectedMicId: 'default',
   autoPunctuation: true,
   removeFillerWords: true,
@@ -103,12 +102,27 @@ export const DEFAULT_PROMPTS: PromptTemplate[] = SHARED_DEFAULT_PROMPTS;
 
 
 class StorageService {
-  private filePath: string;
-  private data: AppData;
+  private filePath: string | null = null;
+  private data: AppData | null = null;
+  /** True when no data file existed at startup (clean install / new user) */
+  private freshInstall = false;
 
-  constructor() {
+  /**
+   * Lazy init: esbuild hoists module singletons above the portable-redirect in
+   * main.ts, so the path must be resolved on first USE (after setPath), not at
+   * construction. Portable builds depend on this ordering.
+   */
+  private ensureLoaded(): void {
+    if (this.data) return;
     this.filePath = this.resolveFilePath();
+    this.freshInstall = !fs.existsSync(this.filePath);
     this.data = this.loadData();
+  }
+
+  /** First launch on this machine — used to show the onboarding wizard once */
+  public isFreshInstall(): boolean {
+    this.ensureLoaded();
+    return this.freshInstall;
   }
 
   private resolveFilePath(): string {
@@ -151,7 +165,6 @@ class StorageService {
         // We will decrypt lazily in getSettings().
         if (settings.groqApiKey) settings.groqApiKey = decryptSecret(settings.groqApiKey);
         if (settings.openaiApiKey) settings.openaiApiKey = decryptSecret(settings.openaiApiKey);
-        if (settings.deepgramApiKey) settings.deepgramApiKey = decryptSecret(settings.deepgramApiKey);
         if (settings.geminiApiKey) settings.geminiApiKey = decryptSecret(settings.geminiApiKey);
         if (settings.customLlmApiKey) settings.customLlmApiKey = decryptSecret(settings.customLlmApiKey);
 
@@ -178,11 +191,11 @@ class StorageService {
 
   private save(): void {
     try {
+      this.ensureLoaded();
       // Clone settings and encrypt sensitive keys before disk write
-      const clonedSettings = { ...this.data.settings };
+      const clonedSettings = { ...this.data!.settings };
       if (clonedSettings.groqApiKey) clonedSettings.groqApiKey = encryptSecret(clonedSettings.groqApiKey);
       if (clonedSettings.openaiApiKey) clonedSettings.openaiApiKey = encryptSecret(clonedSettings.openaiApiKey);
-      if (clonedSettings.deepgramApiKey) clonedSettings.deepgramApiKey = encryptSecret(clonedSettings.deepgramApiKey);
       if (clonedSettings.geminiApiKey) clonedSettings.geminiApiKey = encryptSecret(clonedSettings.geminiApiKey);
       if (clonedSettings.customLlmApiKey) clonedSettings.customLlmApiKey = encryptSecret(clonedSettings.customLlmApiKey);
 
@@ -205,8 +218,9 @@ class StorageService {
   }
 
   getSettings(): AppSettings {
+    this.ensureLoaded();
     // Lazily decrypt any secrets if they were loaded before safeStorage became ready
-    const s = this.data.settings;
+    const s = this.data!.settings;
     if (s.groqApiKey && (s.groqApiKey.startsWith('enc:') || s.groqApiKey.startsWith('b64:'))) {
       const dec = decryptSecret(s.groqApiKey);
       if (dec && !dec.startsWith('enc:') && !dec.startsWith('b64:')) {
@@ -217,12 +231,6 @@ class StorageService {
       const dec = decryptSecret(s.openaiApiKey);
       if (dec && !dec.startsWith('enc:') && !dec.startsWith('b64:')) {
         s.openaiApiKey = dec;
-      }
-    }
-    if (s.deepgramApiKey && (s.deepgramApiKey.startsWith('enc:') || s.deepgramApiKey.startsWith('b64:'))) {
-      const dec = decryptSecret(s.deepgramApiKey);
-      if (dec && !dec.startsWith('enc:') && !dec.startsWith('b64:')) {
-        s.deepgramApiKey = dec;
       }
     }
     if (s.geminiApiKey && (s.geminiApiKey.startsWith('enc:') || s.geminiApiKey.startsWith('b64:'))) {
@@ -238,63 +246,71 @@ class StorageService {
       }
     }
 
-    const out = { ...this.data.settings };
+    const out = { ...this.data!.settings };
     // If a secret still cannot be decrypted (e.g. data migrated from another
     // appId after rebranding), expose an empty value to the app so encrypted
     // blobs are never sent to APIs — but keep the original ciphertext in
     // memory/disk so it is not destroyed until the user replaces it.
     if (out.groqApiKey && (out.groqApiKey.startsWith('enc:') || out.groqApiKey.startsWith('b64:'))) out.groqApiKey = '';
     if (out.openaiApiKey && (out.openaiApiKey.startsWith('enc:') || out.openaiApiKey.startsWith('b64:'))) out.openaiApiKey = '';
-    if (out.deepgramApiKey && (out.deepgramApiKey.startsWith('enc:') || out.deepgramApiKey.startsWith('b64:'))) out.deepgramApiKey = '';
     if (out.geminiApiKey && (out.geminiApiKey.startsWith('enc:') || out.geminiApiKey.startsWith('b64:'))) out.geminiApiKey = '';
     if (out.customLlmApiKey && (out.customLlmApiKey.startsWith('enc:') || out.customLlmApiKey.startsWith('b64:'))) out.customLlmApiKey = '';
     return out;
   }
 
   updateSettings(settings: Partial<AppSettings>): AppSettings {
-    this.data.settings = { ...this.data.settings, ...settings };
+    this.ensureLoaded();
+    this.data!.settings = { ...this.data!.settings, ...settings };
     this.save();
     return this.getSettings();
   }
 
   getDictionary(): CustomWord[] {
-    return this.data.dictionary;
+    this.ensureLoaded();
+    return this.data!.dictionary;
   }
 
   saveDictionary(dictionary: CustomWord[]): void {
-    this.data.dictionary = dictionary;
+    this.ensureLoaded();
+    this.data!.dictionary = dictionary;
     this.save();
   }
 
   getSnippets(): TextSnippet[] {
-    return this.data.snippets;
+    this.ensureLoaded();
+    return this.data!.snippets;
   }
 
   saveSnippets(snippets: TextSnippet[]): void {
-    this.data.snippets = snippets;
+    this.ensureLoaded();
+    this.data!.snippets = snippets;
     this.save();
   }
 
   getPrompts(): PromptTemplate[] {
-    if (!this.data.prompts || this.data.prompts.length === 0) {
-      this.data.prompts = DEFAULT_PROMPTS;
+    this.ensureLoaded();
+    if (!this.data!.prompts || this.data!.prompts.length === 0) {
+      this.data!.prompts = DEFAULT_PROMPTS;
     }
-    return this.data.prompts;
+    return this.data!.prompts;
   }
 
   savePrompts(prompts: PromptTemplate[]): void {
-    this.data.prompts = prompts.length > 0 ? prompts : DEFAULT_PROMPTS;
+    this.ensureLoaded();
+    this.data!.prompts = prompts.length > 0 ? prompts : DEFAULT_PROMPTS;
     this.save();
   }
 
   getHistory(): DictationHistoryItem[] {
-    return this.data.history;
+    this.ensureLoaded();
+    return this.data!.history;
   }
 
   addHistoryItem(item: DictationHistoryItem): void {
-    this.data.history.unshift(item);
-    if (this.data.history.length > 200) {
-      this.data.history = this.data.history.slice(0, 200);
+    this.ensureLoaded();
+    this.data!.history.unshift(item);
+    if (this.data!.history.length > 200) {
+      this.data!.history = this.data!.history.slice(0, 200);
     }
     this.save();
     this.notifyHistoryChanged();
@@ -306,14 +322,15 @@ class StorageService {
       const { BrowserWindow } = require('electron');
       for (const win of BrowserWindow.getAllWindows()) {
         if (win && !win.isDestroyed()) {
-          win.webContents.send('storage:history-changed', this.data.history);
+          win.webContents.send('storage:history-changed', this.data!.history);
         }
       }
     } catch {}
   }
 
   clearHistory(): void {
-    this.data.history = [];
+    this.ensureLoaded();
+    this.data!.history = [];
     this.save();
   }
 }

@@ -90,11 +90,11 @@ export async function transcribeAudio(audioBuffer: Buffer, mimeType = 'audio/wav
       };
     }
 
-    return {
-      text: 'Dictori работает! Укажите API-ключ провайдера в настройках или выберите локальную модель.',
-      durationSeconds: 1,
-      latencyMs: Date.now() - startTime
-    };
+    // No key and no local model: surface as an error so the HUD shows a red
+    // state — returning demo text here would type it into the user's document.
+    throw new Error(
+      'Укажите API-ключ провайдера в настройках (Настройки → Модели) или скачайте локальную модель.'
+    );
   }
 
   const endpoint = provider === 'groq'

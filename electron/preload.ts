@@ -14,6 +14,7 @@ import {
 const api = {
   // Settings & Storage
   getSettings: (): Promise<AppSettings> => ipcRenderer.invoke('storage:get-settings'),
+  isFreshInstall: (): Promise<boolean> => ipcRenderer.invoke('storage:is-fresh-install'),
   updateSettings: (settings: Partial<AppSettings>): Promise<AppSettings> => ipcRenderer.invoke('storage:update-settings', settings),
   getDictionary: (): Promise<CustomWord[]> => ipcRenderer.invoke('storage:get-dictionary'),
   saveDictionary: (dictionary: CustomWord[]): Promise<void> => ipcRenderer.invoke('storage:save-dictionary', dictionary),
