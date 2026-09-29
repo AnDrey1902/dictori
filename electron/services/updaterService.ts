@@ -59,8 +59,8 @@ async function fetchLatestGitHubRelease(): Promise<{
   fileName: string;
   fileSize: number;
 } | null> {
-  const res = await getJson('https://api.github.com/repos/AnDrey1902/speaky/releases/latest', {
-    'User-Agent': 'speaky-desktop',
+  const res = await getJson('https://api.github.com/repos/AnDrey1902/dictori/releases/latest', {
+    'User-Agent': 'dictori-desktop',
     'Accept': 'application/vnd.github.v3+json'
   });
 
@@ -119,7 +119,7 @@ function streamDownload(
   fileName: string,
   onProgress: (percent: number) => void
 ): Promise<string> {
-  const updateDir = path.join(process.env.LOCALAPPDATA || app.getPath('userData'), 'speaky-updater');
+  const updateDir = path.join(process.env.LOCALAPPDATA || app.getPath('userData'), 'dictori-updater');
   if (!fs.existsSync(updateDir)) {
     fs.mkdirSync(updateDir, { recursive: true });
   }
@@ -136,7 +136,7 @@ function streamDownload(
         const transport = u.protocol === 'http:' ? http : https;
         const req = transport.get(
           currentUrl,
-          { headers: { 'User-Agent': 'speaky-desktop' } },
+          { headers: { 'User-Agent': 'dictori-desktop' } },
           (res) => {
             if (res.statusCode && res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
               return downloadStep(res.headers.location, redirectCount + 1);
@@ -192,7 +192,7 @@ export function initAutoUpdater(
     autoUpdater.setFeedURL({
       provider: 'github',
       owner: 'AnDrey1902',
-      repo: 'speaky'
+      repo: 'dictori'
     });
   } catch (err) {
     console.warn('[AutoUpdater] Failed to set explicit feed URL:', err);

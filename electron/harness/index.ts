@@ -8,6 +8,7 @@ import { ExecutionManager } from './execution/ExecutionManager';
 import { HarnessPipelineInput, HarnessPipelineOutput } from './types';
 
 export class SpeakyHarness {
+  // Dictori harness facade (class name kept for test compatibility)
   public readonly tooling: ToolRegistry;
   public readonly context: ContextManager;
   public readonly lifecycle: LifecycleManager;

@@ -8,14 +8,14 @@ import { storage } from './storage';
 export { MODEL_CATALOG, getCatalogEntry };
 
 /**
- * Speaky local model manager.
+ * Dictori local model manager.
  * Models are single-file ggml/gguf checkpoints downloaded directly from HuggingFace
  * into <exeDir>/models (or userData/models as fallback). The engine binary itself ships
  * with the app (resources/transcribe) — nothing to install, no Python.
  */
 
 /**
- * Speaky local model manager.
+ * Dictori local model manager.
  * Models are single-file ggml/gguf checkpoints downloaded directly from
  * HuggingFace. Install location: next to the app itself (<exeDir>/models),
  * so a D:\ install keeps its models on D:. Falls back to userData/models
@@ -369,7 +369,7 @@ export function downloadModel(
 
       try {
         request = net.request({ url, redirect: 'follow' });
-        request.setHeader('User-Agent', 'Speaky/1.0');
+        request.setHeader('User-Agent', 'Dictori/1.0');
         if (fileOffset > 0) {
           request.setHeader('Range', `bytes=${fileOffset}-`);
         }

@@ -39,7 +39,7 @@ import os from 'os';
 // Hardware and legacy compatibility switches for older PCs/GPUs
 app.commandLine.appendSwitch('disable-gpu-process-crash-limit');
 
-// Portable mode (speaky-portable-*.exe): keep all data (settings, history,
+// Portable mode (dictori-portable-*.exe): keep all data (settings, history,
 // models) in a folder next to the exe so it travels with the flash drive
 export function isPortableApp(): boolean {
   return Boolean(process.env.PORTABLE_EXECUTABLE_DIR);
@@ -47,7 +47,12 @@ export function isPortableApp(): boolean {
 
 if (process.env.PORTABLE_EXECUTABLE_DIR) {
   try {
-    const portableData = path.join(process.env.PORTABLE_EXECUTABLE_DIR, 'SpeakyData');
+    // Prefer the legacy SpeakyData folder if present (upgrade from v1.1.x portable)
+    const legacyData = path.join(process.env.PORTABLE_EXECUTABLE_DIR, 'SpeakyData');
+    const portableData = path.join(process.env.PORTABLE_EXECUTABLE_DIR, 'DictoriData');
+    if (!fs.existsSync(portableData) && fs.existsSync(legacyData)) {
+      try { fs.cpSync(legacyData, portableData, { recursive: true }); } catch {}
+    }
     if (!fs.existsSync(portableData)) {
       fs.mkdirSync(portableData, { recursive: true });
     }
@@ -282,7 +287,7 @@ function createSettingsWindow() {
     minHeight: 550,
     frame: false,
     center: true,
-    title: 'Speaky',
+    title: 'Dictori',
     autoHideMenuBar: true,
     backgroundColor: '#09090b',
     show: true,
@@ -396,7 +401,7 @@ function getTrayLabels() {
       settings: 'Настройки и профили',
       showWidget: 'Показать виджет',
       exit: 'Выход',
-      tooltip: 'Speaky — голосовой ввод'
+      tooltip: 'Dictori — голосовой ввод'
     };
   }
 
@@ -404,7 +409,7 @@ function getTrayLabels() {
     settings: 'Settings & Profiles',
     showWidget: 'Show Widget',
     exit: 'Exit',
-    tooltip: 'Speaky — AI Voice Assistant'
+    tooltip: 'Dictori — AI Voice Assistant'
   };
 }
 
@@ -739,13 +744,13 @@ function applyAutoStart(enabled: boolean) {
       const runKey = 'HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Run';
 
       if (enabled) {
-        const psCommand = `$val = '"${exePath}" "${appPath}" --autostart'; Set-ItemProperty -Path "${runKey}" -Name "Speaky" -Value $val`;
+        const psCommand = `$val = '"${exePath}" "${appPath}" --autostart'; Set-ItemProperty -Path "${runKey}" -Name "Dictori" -Value $val`;
         exec(`powershell -NoProfile -NonInteractive -Command "${psCommand.replace(/"/g, '\\"')}"`, (err: any) => {
           if (err) console.error('[AutoStart] Error setting registry:', err);
           else console.log('[AutoStart] Successfully registered in HKCU Run registry');
         });
       } else {
-        const psCommand = `Remove-ItemProperty -Path "${runKey}" -Name "Speaky" -ErrorAction SilentlyContinue`;
+        const psCommand = `Remove-ItemProperty -Path "${runKey}" -Name "Dictori" -ErrorAction SilentlyContinue; Remove-ItemProperty -Path "${runKey}" -Name "Speaky" -ErrorAction SilentlyContinue`;
         exec(`powershell -NoProfile -NonInteractive -Command "${psCommand.replace(/"/g, '\\"')}"`, (err: any) => {
           if (err) console.error('[AutoStart] Error removing from registry:', err);
           else console.log('[AutoStart] Removed from HKCU Run registry');
@@ -880,7 +885,7 @@ function setupIpcHandlers() {
 
     const ext = format === 'txt' ? 'txt' : 'md';
     const dateStr = new Date().toISOString().slice(0, 10);
-    const defaultFilename = `speaky_history_${dateStr}.${ext}`;
+    const defaultFilename = `dictori_history_${dateStr}.${ext}`;
 
     const saveRes = await dialog.showSaveDialog(settingsWindow || BrowserWindow.getFocusedWindow() || undefined, {
       title: 'Экспорт истории записей',
@@ -901,7 +906,7 @@ function setupIpcHandlers() {
     const nowReadable = new Date().toLocaleString('ru-RU');
 
     if (format === 'txt') {
-      fileContent = `ЖУРНАЛ ДИКТОВОК «SPEAKY»\nЭкспортировано: ${nowReadable}\nВсего записей: ${history.length}\n` +
+      fileContent = `ЖУРНАЛ ДИКТОВОК «DICTORI»\nЭкспортировано: ${nowReadable}\nВсего записей: ${history.length}\n` +
         '='.repeat(60) + '\n\n' +
         history.map((item) => {
           const date = new Date(item.timestamp).toLocaleString('ru-RU');
@@ -909,7 +914,7 @@ function setupIpcHandlers() {
           return `[${date}]${appName} (${item.latencyMs}мс)\n${item.processedText}\n` + '-'.repeat(40);
         }).join('\n\n');
     } else {
-      fileContent = `# Журнал диктовок «Speaky»\n\n` +
+      fileContent = `# Журнал диктовок «Dictori»\n\n` +
         `> **Экспортировано:** ${nowReadable}  \n` +
         `> **Всего записей:** ${history.length}\n\n---\n\n` +
         history.map((item) => {

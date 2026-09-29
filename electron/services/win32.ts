@@ -473,7 +473,7 @@ export async function injectText(text: string): Promise<boolean> {
   // Fallback to Clipboard injection for older Windows PCs or restricted windows
   const success = injectClipboardWindows(text);
   if (!success) {
-    console.warn('[Platform] Text injection failed. If target application is running as Administrator, run Speaky as Administrator to satisfy Windows UIPI.');
+    console.warn('[Platform] Text injection failed. If target application is running as Administrator, run Dictori as Administrator to satisfy Windows UIPI.');
   }
   return success;
 }

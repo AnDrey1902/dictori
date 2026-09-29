@@ -91,7 +91,7 @@ export async function transcribeAudio(audioBuffer: Buffer, mimeType = 'audio/wav
     }
 
     return {
-      text: 'Speaky работает! Укажите API-ключ провайдера в настройках или выберите локальную модель.',
+      text: 'Dictori работает! Укажите API-ключ провайдера в настройках или выберите локальную модель.',
       durationSeconds: 1,
       latencyMs: Date.now() - startTime
     };

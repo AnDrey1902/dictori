@@ -1,17 +1,19 @@
-# 🎙️ Speaky — AI голосовой ввод для Windows & macOS
+# 🎙️ Dictori — AI voice typing for Windows & macOS
 
-> **Вы говорите — Speaky печатает.** Open-source альтернатива WisprFlow и Handy: LLM-постобработка и полная приватность — ключи и данные остаются у вас.
+> 🇷🇺 **Русский** | 🇬🇧 **English:** see [README.en.md](README.en.md)
+
+> **Вы говорите — Dictori печатает.** Open-source альтернатива WisprFlow и Handy: LLM-постобработка и полная приватность — ключи и данные остаются у вас.
 >
 > Внутри — **оптимальный комплект отобранных моделей**: баланс скорости и качества, закрывающий большинство повседневных задач. Нужны максимальные скорость и точность — облачный Groq (~200 мс). Нужна конфиденциальность — локальные модели: голос обрабатывается на компьютере и **никуда не уходит**.
 >
 > Надиктуйте текст в **любое приложение** — от терминала до Word. GigaAM и Parakeet работают офлайн на вашем GPU/CPU.
 
-[![Релиз](https://img.shields.io/github/v/release/AnDrey1902/speaky?color=blue&label=Версия)](https://github.com/AnDrey1902/speaky/releases/latest)
-[![Скачать для Windows](https://img.shields.io/badge/Скачать-Windows%20(exe)-success?logo=windows)](https://github.com/AnDrey1902/speaky/releases/latest)
-[![GitHub Stars](https://img.shields.io/github/stars/AnDrey1902/speaky?style=social)](https://github.com/AnDrey1902/speaky)
+[![Релиз](https://img.shields.io/github/v/release/AnDrey1902/dictori?color=blue&label=Версия)](https://github.com/AnDrey1902/dictori/releases/latest)
+[![Скачать для Windows](https://img.shields.io/badge/Скачать-Windows%20(exe)-success?logo=windows)](https://github.com/AnDrey1902/dictori/releases/latest)
+[![GitHub Stars](https://img.shields.io/github/stars/AnDrey1902/dictori?style=social)](https://github.com/AnDrey1902/dictori)
 [![Лицензия](https://img.shields.io/badge/Лицензия-MIT-orange)](#лицензия)
 
-<img src="docs/screenshots/models-en.png" alt="Speaky — вкладка «Модели»: локальный каталог и облачные провайдеры" width="880">
+<img src="docs/screenshots/models-en.png" alt="Dictori — вкладка «Модели»: локальный каталог и облачные провайдеры" width="880">
 <p align="center"><em>Вкладка «Модели»: оптимальный комплект локальных моделей (один клик для скачивания) и облачные провайдеры</em></p>
 
 ---
@@ -20,7 +22,7 @@
 
 ### 🗣️ Распознавание речи — локально или в облаке
 
-Speaky не сваливает на вас десятки моделей — внутри **оптимальный комплект отобранных**: каждая подобрана по соотношению скорости и качества, чтобы закрыть большую часть потребностей пользователя. Дальше — ваш выбор:
+Dictori не сваливает на вас десятки моделей — внутри **оптимальный комплект отобранных**: каждая подобрана по соотношению скорости и качества, чтобы закрыть большую часть потребностей пользователя. Дальше — ваш выбор:
 
 - ☁️ **Скорость и качество прежде всего** — облачный **Groq Whisper** (`whisper-large-v3-turbo` на LPU-чипах, ~150–300 мс, бесплатно до 14 400 запросов/день). Плюс OpenAI Whisper-1 как альтернатива.
 - 🔒 **Конфиденциальность прежде всего** — одна из **локальных моделей**: аудио обрабатывается прямо на компьютере, без интернета и без ключей.
@@ -35,13 +37,14 @@ Speaky не сваливает на вас десятки моделей — в�
   | **Whisper Small** (Q6_K) | transcribe.cpp (CPU) | ~99 языков | 212 МБ | 🐢 компактный, для слабых ПК |
 
   Рекомендация: **GigaAM v3** — для русского, **Parakeet TDT v3** — для украинского и языков Европы. **Whisper Turbo** — когда нужны ~100 языков и режим перевода. Все описания в настройках — на 8 языках.
+
 - **Два встроенных движка — ничего устанавливать не нужно:** `transcribe.dll` (Vulkan-ускорение для GigaAM/Parakeet, модель живёт в RAM между диктовками, настраиваемая выгрузка по простою) и `whisper.cpp` (cli + сервер с удержанием модели в памяти). Python не требуется.
 - **Своя модель из файла или папки:** уже скачанная GGUF/GGML-модель подключается в один клик — движок (`transcribe.cpp` / `whisper.cpp`) определяется автоматически, файлы не копируются и не удаляются.
 - **Облачные STT:** Groq Whisper (`whisper-large-v3-turbo`, ~150–300 мс на LPU) и OpenAI Whisper-1.
 - **Автофолбэк:** нет сети или ключа — облачный режим прозрачно падает на локальную модель и наоборот.
 - **Докачка после обрыва сети:** загрузка моделей продолжается с места разрыва (до 8 попыток), битые файлы не сохраняются.
 
-<img src="docs/screenshots/postprocessing-en.png" alt="Speaky — постобработка LLM: Groq, OpenAI, Gemini, OpenAI-совместимые" width="880">
+<img src="docs/screenshots/postprocessing-en.png" alt="Dictori — постобработка LLM: Groq, OpenAI, Gemini, OpenAI-совместимые" width="880">
 <p align="center"><em>Постобработка LLM: Groq / OpenAI / Gemini / любой OpenAI-совместимый сервер</em></p>
 
 ### 🧠 Постобработка LLM — ваш AI-редактор
@@ -59,12 +62,12 @@ Speaky не сваливает на вас десятки моделей — в�
 - **Перевод выделенного текста** — выделите текст в любом приложении, нажмите хоткей: перевод заменит выделение, буфер обмена восстановится.
 - **Перевод голосом** — если выделения нет, говорите на русском — в приложение вставится готовый английский (или uk/es/de/fr/it/zh). Системный промпт редактируется.
 
-<img src="docs/screenshots/settings-en.png" alt="Speaky — настройки: язык, хоткеи, режимы записи" width="880">
+<img src="docs/screenshots/settings-en.png" alt="Dictori — настройки: язык, хоткеи, режимы записи" width="880">
 <p align="center"><em>Настройки: язык интерфейса, хоткеи, режимы Toggle / Push-to-Talk</em></p>
 
 ### ⌨️ Горячие клавиши
 
-Клик по полю → нажмите сочетание → готово. Рекордер проверяет занятость сочетания другими приложениями и конфликт с другими действиями Speaky. Режимы **Toggle** и **Push-to-Talk**.
+Клик по полю → нажмите сочетание → готово. Рекордер проверяет занятость сочетания другими приложениями и конфликт с другими действиями Dictori. Режимы **Toggle** и **Push-to-Talk**.
 
 ### 🎛️ Прочее
 
@@ -79,9 +82,9 @@ Speaky не сваливает на вас десятки моделей — в�
 
 ---
 
-## ⚔️ Speaky vs WisprFlow vs Handy
+## ⚔️ Dictori vs WisprFlow vs Handy
 
-| | **Speaky** | **WisprFlow** | **Handy** |
+| | **Dictori** | **WisprFlow** | **Handy** |
 |:---|:---|:---|:---|
 | **Цена** | ✅ Бесплатно, open source (MIT) | 💰 Подписка ~$12/мес (Free: 2000 слов/нед) | ✅ Бесплатно, open source |
 | **Локальные модели** | ✅ GigaAM/Parakeet/Whisper + **своя модель** | ⚠️ Только на платном тарифе | ✅ Whisper и др. |
@@ -96,7 +99,7 @@ Speaky не сваливает на вас десятки моделей — в�
 | **Кроссплатформенность** | ✅ Windows, macOS (Linux-цели в сборке) | ✅ Win/macOS | ✅ Win/macOS/Linux |
 | **Приватность** | ✅ Ключи в DPAPI/Keychain, офлайн-режим полный | ❌ Облако по умолчанию | ✅ Полностью офлайн |
 
-> **TL;DR:** WisprFlow — полированный платный сервис с облаком; Handy — минималистичный офлайн-диктовщик без LLM-головы; **Speaky** — объединяет: облачную скорость Groq, полный офлайн на GigaAM/Parakeet (включая свои модели), LLM-постобработку с любым провайдером и своими промптами — бесплатно и open source.
+> **TL;DR:** WisprFlow — полированный платный сервис с облаком; Handy — минималистичный офлайн-диктовщик без LLM-головы; **Dictori** — объединяет: облачную скорость Groq, полный офлайн на GigaAM/Parakeet (включая свои модели), LLM-постобработку с любым провайдером и своими промптами — бесплатно и open source.
 
 ---
 
@@ -148,20 +151,23 @@ npm run dist:portable
 
 | Платформа | Файл | Инструкция |
 | :--- | :--- | :--- |
-| **Windows 10 / 11 (64-бит)** | [**Speaky Setup (exe)**](https://github.com/AnDrey1902/speaky/releases/latest) | Запустите инсталлятор и следуйте подсказкам мастера. |
-| **Windows Portable** | [**Speaky Portable (exe)**](https://github.com/AnDrey1902/speaky/releases/latest) | Один файл без установки — удобно с собой. |
-| **macOS (Apple Silicon)** | [**Speaky (dmg)**](https://github.com/AnDrey1902/speaky/releases/latest) | Откройте DMG и перетащите Speaky в Applications. |
+| **Windows 10 / 11 (64-бит)** | [**Dictori Setup (exe)**](https://github.com/AnDrey1902/dictori/releases/latest) | Запустите инсталлятор и следуйте подсказкам мастера. |
+| **Windows Portable** | [**Dictori Portable (exe)**](https://github.com/AnDrey1902/dictori/releases/latest) | Один файл без установки — удобно с собой. |
+| **macOS (Apple Silicon)** | [**Dictori (dmg)**](https://github.com/AnDrey1902/dictori/releases/latest) | Откройте DMG и перетащите Dictori в Applications. |
 
 > [!TIP]
 > **SmartScreen при первом запуске:** приложение открытое (Open Source) без платного сертификата Microsoft, поэтому Windows может показать синее окно защиты. Нажмите **«Подробнее» → «Выполнить в любом случае»** — это стандартно для opensource-софта.
+
+> [!NOTE]
+> **Обновление с Speaky v1.1.x:** установщик Dictori обновляет приложение на месте — настройки, ключи и модели сохраняются.
 
 ---
 
 ## ⭐ Поддержите проект
 
-Если Speaky экономит ваше время — поставьте **звезду на GitHub**, это лучшая мотивация развивать проект.
+Если Dictori экономит ваше время — поставьте **звезду на GitHub**, это лучшая мотивация развивать проект.
 
-[![Star History Chart](https://api.star-history.com/svg?repos=AnDrey1902/speaky&type=Date)](https://star-history.com/#AnDrey1902/speaky&Date)
+[![Star History Chart](https://api.star-history.com/svg?repos=AnDrey1902/dictori&type=Date)](https://star-history.com/#AnDrey1902/dictori&Date)
 
 ---
 

@@ -89,10 +89,10 @@ export const I18N = {
     keepWarm60: '1 час',
     keepWarmAlways: 'Всегда (24 ч)',
     // Model descriptions (see src/modelCatalog.ts)
-    descGigaamQ5: 'Только русский: топ-точность с пунктуацией, очень быстрая (Vulkan). Украинский не поддерживается — для него выберите Parakeet. Отдельные английские слова распознаёт, но полный английский — нет. Часть оптимального комплекта моделей Speaky, подобранного по балансу скорости и качества — он закрывает большинство повседневных задач.',
-    descParakeetQ5: 'Мультиязычная (25 европейских языков, вкл. русский и украинский), с пунктуацией. Выбор для украинского. Очень быстрая — работает на GPU (Vulkan). Часть оптимального комплекта моделей Speaky, подобранного по балансу скорости и качества.',
-    descWhisperTurbo: 'Классика Whisper в компактном GGUF: ~100 языков и режим перевода, максимум точности. CPU-only: Vulkan-бэкенд искажает whisper-модели. Часть оптимального комплекта моделей Speaky.',
-    descWhisperSmall: 'Мультиязычная (~99 языков) на едином движке transcribe.cpp. CPU-only: Vulkan-бэкенд искажает whisper-модели. Компактный вариант для слабых ПК. Часть оптимального комплекта моделей Speaky.',
+    descGigaamQ5: 'Только русский: топ-точность с пунктуацией, очень быстрая (Vulkan). Украинский не поддерживается — для него выберите Parakeet. Отдельные английские слова распознаёт, но полный английский — нет. Часть оптимального комплекта моделей Dictori, подобранного по балансу скорости и качества — он закрывает большинство повседневных задач.',
+    descParakeetQ5: 'Мультиязычная (25 европейских языков, вкл. русский и украинский), с пунктуацией. Выбор для украинского. Очень быстрая — работает на GPU (Vulkan). Часть оптимального комплекта моделей Dictori, подобранного по балансу скорости и качества.',
+    descWhisperTurbo: 'Классика Whisper в компактном GGUF: ~100 языков и режим перевода, максимум точности. CPU-only: Vulkan-бэкенд искажает whisper-модели. Часть оптимального комплекта моделей Dictori.',
+    descWhisperSmall: 'Мультиязычная (~99 языков) на едином движке transcribe.cpp. CPU-only: Vulkan-бэкенд искажает whisper-модели. Компактный вариант для слабых ПК. Часть оптимального комплекта моделей Dictori.',
 
     // Models
     downloadError: 'Ошибка скачивания',
@@ -119,7 +119,7 @@ export const I18N = {
     modelFolderHint: 'модель внутри папки',
 
     // Hotkeys / HUD
-    hotkeyTakenSelf: 'Это сочетание уже занято другим действием Speaky',
+    hotkeyTakenSelf: 'Это сочетание уже занято другим действием Dictori',
     hotkeyTakenSystem: 'Сочетание занято системой',
     hotkeyRecording: 'Нажмите сочетание…',
     hotkeyPressHint: 'Нажмите и задайте сочетание клавиш (Esc — отмена)',
@@ -346,10 +346,10 @@ export const I18N = {
     keepWarm60: '1 hour',
     keepWarmAlways: 'Always (24 h)',
     // Model descriptions (see src/modelCatalog.ts)
-    descGigaamQ5: 'Russian only: top accuracy with punctuation, very fast (Vulkan). Ukrainian is not supported — pick Parakeet for it. Recognizes separate English words but not full English. Part of Speaky’s curated model set, chosen for the best speed-to-quality balance — it covers most everyday needs.',
-    descParakeetQ5: 'Multilingual (25 European languages incl. Russian and Ukrainian), with punctuation. The choice for Ukrainian. Very fast — runs on GPU (Vulkan). Part of Speaky’s curated model set.',
-    descWhisperTurbo: 'Classic Whisper in a compact GGUF: ~100 languages and translate mode, maximum accuracy. CPU-only: the Vulkan backend garbles whisper models. Part of Speaky’s curated model set.',
-    descWhisperSmall: 'Multilingual (~99 languages) on the single transcribe.cpp engine. CPU-only: the Vulkan backend garbles whisper models. A compact option for weaker PCs. Part of Speaky’s curated model set.',
+    descGigaamQ5: 'Russian only: top accuracy with punctuation, very fast (Vulkan). Ukrainian is not supported — pick Parakeet for it. Recognizes separate English words but not full English. Part of Dictori’s curated model set, chosen for the best speed-to-quality balance — it covers most everyday needs.',
+    descParakeetQ5: 'Multilingual (25 European languages incl. Russian and Ukrainian), with punctuation. The choice for Ukrainian. Very fast — runs on GPU (Vulkan). Part of Dictori’s curated model set.',
+    descWhisperTurbo: 'Classic Whisper in a compact GGUF: ~100 languages and translate mode, maximum accuracy. CPU-only: the Vulkan backend garbles whisper models. Part of Dictori’s curated model set.',
+    descWhisperSmall: 'Multilingual (~99 languages) on the single transcribe.cpp engine. CPU-only: the Vulkan backend garbles whisper models. A compact option for weaker PCs. Part of Dictori’s curated model set.',
 
     // Models
     downloadError: 'Download failed',
@@ -376,7 +376,7 @@ export const I18N = {
     modelFolderHint: 'model inside the folder',
 
     // Hotkeys / HUD
-    hotkeyTakenSelf: 'This shortcut is already used by another Speaky action',
+    hotkeyTakenSelf: 'This shortcut is already used by another Dictori action',
     hotkeyTakenSystem: 'Shortcut is taken by the system',
     hotkeyRecording: 'Press keys…',
     hotkeyPressHint: 'Click and press a key combo (Esc to cancel)',
@@ -603,10 +603,10 @@ export const I18N = {
     unregisterFolderTitle: 'Desconectar la carpeta (los archivos no se borran)',
     disconnect: 'Desconectar',
     localModelFallback: 'Modelo local',
-    descGigaamQ5: 'Solo ruso: precisión máxima con puntuación, muy rápida (Vulkan). No admite ucraniano: para eso elige Parakeet. Reconoce palabras sueltas en inglés, pero no inglés completo. Forma parte del conjunto óptimo de modelos de Speaky, elegido por su equilibrio entre velocidad y calidad: cubre la mayoría de las necesidades cotidianas.',
-    descParakeetQ5: 'Multilingüe (25 lenguas europeas, incl. ruso y ucraniano), con puntuación. La elección para ucraniano. Muy rápida: funciona en GPU (Vulkan). Forma parte del conjunto óptimo de modelos de Speaky.',
-    descWhisperTurbo: 'El clásico Whisper en un GGUF compacto: ~100 idiomas y modo de traducción, máxima precisión. Solo CPU: el backend Vulkan corrompe los modelos whisper. Forma parte del conjunto óptimo de modelos de Speaky.',
-    descWhisperSmall: 'Multilingüe (~99 idiomas) sobre el motor único transcribe.cpp. Solo CPU: el backend Vulkan corrompe los modelos whisper. Opción compacta para PC modestos. Forma parte del conjunto óptimo de modelos de Speaky.',
+    descGigaamQ5: 'Solo ruso: precisión máxima con puntuación, muy rápida (Vulkan). No admite ucraniano: para eso elige Parakeet. Reconoce palabras sueltas en inglés, pero no inglés completo. Forma parte del conjunto óptimo de modelos de Dictori, elegido por su equilibrio entre velocidad y calidad: cubre la mayoría de las necesidades cotidianas.',
+    descParakeetQ5: 'Multilingüe (25 lenguas europeas, incl. ruso y ucraniano), con puntuación. La elección para ucraniano. Muy rápida: funciona en GPU (Vulkan). Forma parte del conjunto óptimo de modelos de Dictori.',
+    descWhisperTurbo: 'El clásico Whisper en un GGUF compacto: ~100 idiomas y modo de traducción, máxima precisión. Solo CPU: el backend Vulkan corrompe los modelos whisper. Forma parte del conjunto óptimo de modelos de Dictori.',
+    descWhisperSmall: 'Multilingüe (~99 idiomas) sobre el motor único transcribe.cpp. Solo CPU: el backend Vulkan corrompe los modelos whisper. Opción compacta para PC modestos. Forma parte del conjunto óptimo de modelos de Dictori.',
     modelsSubtitle: 'Un conjunto óptimo de modelos que equilibra velocidad y calidad para la mayoría de las tareas. Nube (Groq) para máxima velocidad y precisión; modelos locales cuando tu voz no debe salir del ordenador.',
     connectModelTitle: 'Conectar modelo',
     connectModelDesc: 'Un archivo de modelo o la carpeta que lo contiene.',
@@ -616,7 +616,7 @@ export const I18N = {
     modelFolderHint: 'modelo dentro de la carpeta',
 
     // Hotkeys / HUD
-    hotkeyTakenSelf: 'Este atajo ya lo usa otra acción de Speaky',
+    hotkeyTakenSelf: 'Este atajo ya lo usa otra acción de Dictori',
     hotkeyTakenSystem: 'El atajo está ocupado por el sistema',
     hotkeyRecording: 'Pulsa la combinación…',
     hotkeyPressHint: 'Pulsa y asigna una combinación (Esc para cancelar)',
@@ -810,10 +810,10 @@ export const I18N = {
     unregisterFolderTitle: 'Ordner trennen (Dateien werden nicht gelöscht)',
     disconnect: 'Trennen',
     localModelFallback: 'Lokales Modell',
-    descGigaamQ5: 'Nur Russisch: höchste Genauigkeit mit Zeichensetzung, sehr schnell (Vulkan). Ukrainisch wird nicht unterstützt — dafür Parakeet wählen. Einzelne englische Wörter ja, fließendes Englisch nein. Teil des optimalen Modell-Sets von Speaky, ausgewählt nach bester Balance aus Geschwindigkeit und Qualität — deckt die meisten Alltagsaufgaben ab.',
-    descParakeetQ5: 'Mehrsprachig (25 europäische Sprachen inkl. Russisch und Ukrainisch), mit Zeichensetzung. Die Wahl für Ukrainisch. Sehr schnell — läuft auf der GPU (Vulkan). Teil des optimalen Modell-Sets von Speaky.',
-    descWhisperTurbo: 'Der klassische Whisper als kompaktes GGUF: ~100 Sprachen und Übersetzungsmodus, maximale Genauigkeit. Nur CPU: das Vulkan-Backend verfälscht Whisper-Modelle. Teil des optimalen Modell-Sets von Speaky.',
-    descWhisperSmall: 'Mehrsprachig (~99 Sprachen) auf der einen transcribe.cpp-Engine. Nur CPU: das Vulkan-Backend verfälscht Whisper-Modelle. Kompakte Option für schwächere PCs. Teil des optimalen Modell-Sets von Speaky.',
+    descGigaamQ5: 'Nur Russisch: höchste Genauigkeit mit Zeichensetzung, sehr schnell (Vulkan). Ukrainisch wird nicht unterstützt — dafür Parakeet wählen. Einzelne englische Wörter ja, fließendes Englisch nein. Teil des optimalen Modell-Sets von Dictori, ausgewählt nach bester Balance aus Geschwindigkeit und Qualität — deckt die meisten Alltagsaufgaben ab.',
+    descParakeetQ5: 'Mehrsprachig (25 europäische Sprachen inkl. Russisch und Ukrainisch), mit Zeichensetzung. Die Wahl für Ukrainisch. Sehr schnell — läuft auf der GPU (Vulkan). Teil des optimalen Modell-Sets von Dictori.',
+    descWhisperTurbo: 'Der klassische Whisper als kompaktes GGUF: ~100 Sprachen und Übersetzungsmodus, maximale Genauigkeit. Nur CPU: das Vulkan-Backend verfälscht Whisper-Modelle. Teil des optimalen Modell-Sets von Dictori.',
+    descWhisperSmall: 'Mehrsprachig (~99 Sprachen) auf der einen transcribe.cpp-Engine. Nur CPU: das Vulkan-Backend verfälscht Whisper-Modelle. Kompakte Option für schwächere PCs. Teil des optimalen Modell-Sets von Dictori.',
     modelsSubtitle: 'Ein kuratiertes Modell-Set mit bester Balance aus Geschwindigkeit und Qualität für die meisten Aufgaben. Cloud (Groq) für maximale Geschwindigkeit und Genauigkeit; lokale Modelle, wenn deine Stimme den Computer nie verlassen soll.',
     connectModelTitle: 'Modell verbinden',
     connectModelDesc: 'Eine einzelne Modelldatei oder der Ordner, der sie enthält.',
@@ -823,7 +823,7 @@ export const I18N = {
     modelFolderHint: 'Modell im Ordner',
 
     // Hotkeys / HUD
-    hotkeyTakenSelf: 'Diese Kombination ist bereits durch eine andere Speaky-Aktion belegt',
+    hotkeyTakenSelf: 'Diese Kombination ist bereits durch eine andere Dictori-Aktion belegt',
     hotkeyTakenSystem: 'Kombination ist vom System belegt',
     hotkeyRecording: 'Tasten drücken…',
     hotkeyPressHint: 'Klicken und Tastenkombination drücken (Esc zum Abbrechen)',
@@ -1017,10 +1017,10 @@ export const I18N = {
     unregisterFolderTitle: 'Déconnecter le dossier (les fichiers ne sont pas supprimés)',
     disconnect: 'Déconnecter',
     localModelFallback: 'Modèle local',
-    descGigaamQ5: 'Russe uniquement : précision maximale avec ponctuation, très rapide (Vulkan). L’ukrainien n’est pas pris en charge — choisissez Parakeet pour cela. Reconnaît quelques mots anglais, mais pas l’anglais complet. Fait partie de la sélection optimale de modèles de Speaky, choisie pour le meilleur équilibre vitesse/qualité — elle couvre la plupart des besoins quotidiens.',
-    descParakeetQ5: 'Multilingue (25 langues européennes dont le russe et l’ukrainien), avec ponctuation. Le choix pour l’ukrainien. Très rapide — fonctionne sur GPU (Vulkan). Fait partie de la sélection optimale de modèles de Speaky.',
-    descWhisperTurbo: 'Le Whisper classique en GGUF compact : ~100 langues et mode traduction, précision maximale. CPU uniquement : le backend Vulkan corrompt les modèles whisper. Fait partie de la sélection optimale de modèles de Speaky.',
-    descWhisperSmall: 'Multilingue (~99 langues) sur le moteur unique transcribe.cpp. CPU uniquement : le backend Vulkan corrompt les modèles whisper. Option compacte pour les PC modestes. Fait partie de la sélection optimale de modèles de Speaky.',
+    descGigaamQ5: 'Russe uniquement : précision maximale avec ponctuation, très rapide (Vulkan). L’ukrainien n’est pas pris en charge — choisissez Parakeet pour cela. Reconnaît quelques mots anglais, mais pas l’anglais complet. Fait partie de la sélection optimale de modèles de Dictori, choisie pour le meilleur équilibre vitesse/qualité — elle couvre la plupart des besoins quotidiens.',
+    descParakeetQ5: 'Multilingue (25 langues européennes dont le russe et l’ukrainien), avec ponctuation. Le choix pour l’ukrainien. Très rapide — fonctionne sur GPU (Vulkan). Fait partie de la sélection optimale de modèles de Dictori.',
+    descWhisperTurbo: 'Le Whisper classique en GGUF compact : ~100 langues et mode traduction, précision maximale. CPU uniquement : le backend Vulkan corrompt les modèles whisper. Fait partie de la sélection optimale de modèles de Dictori.',
+    descWhisperSmall: 'Multilingue (~99 langues) sur le moteur unique transcribe.cpp. CPU uniquement : le backend Vulkan corrompt les modèles whisper. Option compacte pour les PC modestes. Fait partie de la sélection optimale de modèles de Dictori.',
     modelsSubtitle: 'Une sélection optimale de modèles : le meilleur équilibre entre vitesse et qualité pour la plupart des usages. Le cloud (Groq) pour une vitesse et une précision maximales ; les modèles locaux quand votre voix ne doit pas quitter l’ordinateur.',
     connectModelTitle: 'Connecter un modèle',
     connectModelDesc: 'Un fichier de modèle ou le dossier qui le contient.',
@@ -1030,7 +1030,7 @@ export const I18N = {
     modelFolderHint: 'modèle dans le dossier',
 
     // Hotkeys / HUD
-    hotkeyTakenSelf: 'Ce raccourci est déjà utilisé par une autre action de Speaky',
+    hotkeyTakenSelf: 'Ce raccourci est déjà utilisé par une autre action de Dictori',
     hotkeyTakenSystem: 'Raccourci occupé par le système',
     hotkeyRecording: 'Appuyez sur les touches…',
     hotkeyPressHint: 'Cliquez et définissez un raccourci (Échap pour annuler)',
@@ -1224,10 +1224,10 @@ export const I18N = {
     unregisterFolderTitle: '断开文件夹（不删除文件）',
     disconnect: '断开',
     localModelFallback: '本地模型',
-    descGigaamQ5: '仅俄语：标点齐全、精度顶级、速度极快（Vulkan）。不支持乌克兰语——请选择 Parakeet。能识别零散英文单词，但无法识别完整英文。属于 Speaky 精选模型组合：按速度与质量的最佳平衡挑选，覆盖大多数日常需求。',
-    descParakeetQ5: '多语言（25 种欧洲语言，含俄语和乌克兰语），带标点。乌克兰语的首选。速度极快——在 GPU（Vulkan）上运行。属于 Speaky 精选模型组合。',
-    descWhisperTurbo: '经典 Whisper 的紧凑 GGUF 版：约 100 种语言和翻译模式，精度最高。仅 CPU：Vulkan 后端会损坏 whisper 模型。属于 Speaky 精选模型组合。',
-    descWhisperSmall: '多语言（约 99 种语言），基于统一的 transcribe.cpp 引擎。仅 CPU：Vulkan 后端会损坏 whisper 模型。适合配置较低的电脑。属于 Speaky 精选模型组合。',
+    descGigaamQ5: '仅俄语：标点齐全、精度顶级、速度极快（Vulkan）。不支持乌克兰语——请选择 Parakeet。能识别零散英文单词，但无法识别完整英文。属于 Dictori 精选模型组合：按速度与质量的最佳平衡挑选，覆盖大多数日常需求。',
+    descParakeetQ5: '多语言（25 种欧洲语言，含俄语和乌克兰语），带标点。乌克兰语的首选。速度极快——在 GPU（Vulkan）上运行。属于 Dictori 精选模型组合。',
+    descWhisperTurbo: '经典 Whisper 的紧凑 GGUF 版：约 100 种语言和翻译模式，精度最高。仅 CPU：Vulkan 后端会损坏 whisper 模型。属于 Dictori 精选模型组合。',
+    descWhisperSmall: '多语言（约 99 种语言），基于统一的 transcribe.cpp 引擎。仅 CPU：Vulkan 后端会损坏 whisper 模型。适合配置较低的电脑。属于 Dictori 精选模型组合。',
     modelsSubtitle: '精选模型组合：为大多数任务平衡速度与质量。云端（Groq）适合追求极速与高精度；本地模型则让语音永不离开电脑。',
     connectModelTitle: '接入模型',
     connectModelDesc: '单个模型文件或包含它的文件夹。',
@@ -1237,7 +1237,7 @@ export const I18N = {
     modelFolderHint: '文件夹内的模型',
 
     // Hotkeys / HUD
-    hotkeyTakenSelf: '此快捷键已被 Speaky 的其他操作占用',
+    hotkeyTakenSelf: '此快捷键已被 Dictori 的其他操作占用',
     hotkeyTakenSystem: '快捷键已被系统占用',
     hotkeyRecording: '请按下快捷键…',
     hotkeyPressHint: '点击并按下快捷键（Esc 取消）',
@@ -1431,10 +1431,10 @@ export const I18N = {
     keepWarm60: '1 година',
     keepWarmAlways: 'Завжди (24 год)',
     // Model descriptions (see src/modelCatalog.ts)
-    descGigaamQ5: 'Лише російська: топ-точність із пунктуацією, дуже швидка (Vulkan). Українська не підтримується — для неї оберіть Parakeet. Окремі англійські слова розпізнає, але повну англійську — ні. Частина оптимального набору моделей Speaky, підібраного за балансом швидкості та якості — він покриває більшість повсякденних потреб.',
-    descParakeetQ5: 'Багатомовна (25 європейських мов, вкл. російську та українську), з пунктуацією. Вибір для української. Дуже швидка — працює на GPU (Vulkan). Частина оптимального набору моделей Speaky.',
-    descWhisperTurbo: 'Класичний Whisper у компактному GGUF: ~100 мов і режим перекладу, максимальна точність. Лише CPU: Vulkan-бекенд спотворює whisper-моделі. Частина оптимального набору моделей Speaky.',
-    descWhisperSmall: 'Багатомовна (~99 мов) на єдиному рушії transcribe.cpp. Лише CPU: Vulkan-бекенд спотворює whisper-моделі. Компактний варіант для слабших ПК. Частина оптимального набору моделей Speaky.',
+    descGigaamQ5: 'Лише російська: топ-точність із пунктуацією, дуже швидка (Vulkan). Українська не підтримується — для неї оберіть Parakeet. Окремі англійські слова розпізнає, але повну англійську — ні. Частина оптимального набору моделей Dictori, підібраного за балансом швидкості та якості — він покриває більшість повсякденних потреб.',
+    descParakeetQ5: 'Багатомовна (25 європейських мов, вкл. російську та українську), з пунктуацією. Вибір для української. Дуже швидка — працює на GPU (Vulkan). Частина оптимального набору моделей Dictori.',
+    descWhisperTurbo: 'Класичний Whisper у компактному GGUF: ~100 мов і режим перекладу, максимальна точність. Лише CPU: Vulkan-бекенд спотворює whisper-моделі. Частина оптимального набору моделей Dictori.',
+    descWhisperSmall: 'Багатомовна (~99 мов) на єдиному рушії transcribe.cpp. Лише CPU: Vulkan-бекенд спотворює whisper-моделі. Компактний варіант для слабших ПК. Частина оптимального набору моделей Dictori.',
 
     // Models
     downloadError: 'Помилка завантаження',
@@ -1461,7 +1461,7 @@ export const I18N = {
     modelFolderHint: 'модель всередині папки',
 
     // Hotkeys / HUD
-    hotkeyTakenSelf: 'Це поєднання вже зайняте іншою дією Speaky',
+    hotkeyTakenSelf: 'Це поєднання вже зайняте іншою дією Dictori',
     hotkeyTakenSystem: 'Поєднання зайняте системою',
     hotkeyRecording: 'Натисніть поєднання…',
     hotkeyPressHint: 'Натисніть і задайте поєднання клавіш (Esc — скасувати)',
@@ -1688,10 +1688,10 @@ export const I18N = {
     keepWarm60: '1 ora',
     keepWarmAlways: 'Sempre (24 h)',
     // Model descriptions (see src/modelCatalog.ts)
-    descGigaamQ5: 'Solo russo: massima precisione con punteggiatura, molto veloce (Vulkan). L’ucraino non è supportato: per quello scegli Parakeet. Riconosce singole parole inglesi ma non l’inglese completo. Fa parte della selezione ottimale di modelli di Speaky, scelta per il miglior equilibrio tra velocità e qualità — copre la maggior parte delle esigenze quotidiane.',
-    descParakeetQ5: 'Multilingue (25 lingue europee, incl. russo e ucraino), con punteggiatura. La scelta per l’ucraino. Molto veloce — gira su GPU (Vulkan). Fa parte della selezione ottimale di modelli di Speaky.',
-    descWhisperTurbo: 'Il classico Whisper in un GGUF compatto: ~100 lingue e modalità traduzione, precisione massima. Solo CPU: il backend Vulkan corrompe i modelli whisper. Fa parte della selezione ottimale di modelli di Speaky.',
-    descWhisperSmall: 'Multilingue (~99 lingue) sull’unico motore transcribe.cpp. Solo CPU: il backend Vulkan corrompe i modelli whisper. Opzione compatta per PC meno potenti. Fa parte della selezione ottimale di modelli di Speaky.',
+    descGigaamQ5: 'Solo russo: massima precisione con punteggiatura, molto veloce (Vulkan). L’ucraino non è supportato: per quello scegli Parakeet. Riconosce singole parole inglesi ma non l’inglese completo. Fa parte della selezione ottimale di modelli di Dictori, scelta per il miglior equilibrio tra velocità e qualità — copre la maggior parte delle esigenze quotidiane.',
+    descParakeetQ5: 'Multilingue (25 lingue europee, incl. russo e ucraino), con punteggiatura. La scelta per l’ucraino. Molto veloce — gira su GPU (Vulkan). Fa parte della selezione ottimale di modelli di Dictori.',
+    descWhisperTurbo: 'Il classico Whisper in un GGUF compatto: ~100 lingue e modalità traduzione, precisione massima. Solo CPU: il backend Vulkan corrompe i modelli whisper. Fa parte della selezione ottimale di modelli di Dictori.',
+    descWhisperSmall: 'Multilingue (~99 lingue) sull’unico motore transcribe.cpp. Solo CPU: il backend Vulkan corrompe i modelli whisper. Opzione compatta per PC meno potenti. Fa parte della selezione ottimale di modelli di Dictori.',
 
     // Models
     downloadError: 'Errore di scaricamento',
@@ -1718,7 +1718,7 @@ export const I18N = {
     modelFolderHint: 'modello nella cartella',
 
     // Hotkeys / HUD
-    hotkeyTakenSelf: 'Questa combinazione è già usata da un’altra azione di Speaky',
+    hotkeyTakenSelf: 'Questa combinazione è già usata da un’altra azione di Dictori',
     hotkeyTakenSystem: 'Combinazione occupata dal sistema',
     hotkeyRecording: 'Premi i tasti…',
     hotkeyPressHint: 'Clicca e definisci una combinazione (Esc per annullare)',
