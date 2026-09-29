@@ -107,6 +107,47 @@ function legacyModelDir(entry: ModelCatalogEntry): string {
   return path.join(getModelsDir(), 'whisper.cpp', entry.id);
 }
 
+/** Old catalog ids that point to the same model file as a current entry */
+const LEGACY_ID_ALIASES: Record<string, string[]> = {
+  'parakeet-v3-q5': ['parakeet-v3-q4'],
+  'whisper-small-q6': ['whisper-small-q5']
+};
+
+/**
+ * Speaky (v1.1.x and earlier) installed models next to the old Speaky.exe —
+ * the Dictori NSIS installer targets a fresh folder, so scan known legacy
+ * install locations for the same model file (same HF file name = same model).
+ */
+function findLegacyModelFile(entry: ModelCatalogEntry): string | undefined {
+  const candidates = new Set<string>([entry.id, ...(LEGACY_ID_ALIASES[entry.id] || [])]);
+  const roots: string[] = [];
+
+  // Old install dir: sibling of the current install (…\Programs\speaky)
+  try {
+    if (app.isPackaged) {
+      const exeDir = path.dirname(app.getPath('exe'));
+      roots.push(path.join(path.dirname(exeDir), 'speaky', 'models'));
+      roots.push(path.join(path.dirname(exeDir), 'Speaky', 'models'));
+    }
+  } catch {}
+  // Old fallback location: %APPDATA%\speaky\models
+  try {
+    if (process.platform === 'win32' && process.env.APPDATA) roots.push(path.join(process.env.APPDATA, 'speaky', 'models'));
+  } catch {}
+
+  for (const root of roots) {
+    for (const id of candidates) {
+      for (const engineDir of ['transcribe.cpp', 'whisper.cpp']) {
+        const file = path.join(root, engineDir, id, ggmlFileOf(entry));
+        try {
+          if (fs.existsSync(file) && fs.statSync(file).size > 1024 * 1024) return file;
+        } catch {}
+      }
+    }
+  }
+  return undefined;
+}
+
 function ggmlFileOf(entry: ModelCatalogEntry): string {
   return entry.hfFile || `${entry.id}.bin`;
 }
@@ -127,7 +168,9 @@ export function isModelInstalled(entry: ModelCatalogEntry): boolean {
     if (fs.existsSync(file) && fs.statSync(file).size > 1024 * 1024) return true;
     // Soft migration: accept models installed under the legacy whisper.cpp dir
     const legacy = path.join(legacyModelDir(entry), ggmlFileOf(entry));
-    return fs.existsSync(legacy) && fs.statSync(legacy).size > 1024 * 1024;
+    if (fs.existsSync(legacy) && fs.statSync(legacy).size > 1024 * 1024) return true;
+    // Speaky v1.1.x installs: models live in the old install dir under old ids
+    return Boolean(findLegacyModelFile(entry));
   } catch {
     return false;
   }
@@ -140,7 +183,7 @@ export function getInstalledModelPath(modelId?: string): string | undefined {
     if (fs.existsSync(current)) return current;
     const legacy = path.join(legacyModelDir(entry), ggmlFileOf(entry));
     if (fs.existsSync(legacy)) return legacy;
-    return undefined;
+    return findLegacyModelFile(entry);
   };
 
   const entry = modelId ? getCatalogEntry(modelId) : undefined;

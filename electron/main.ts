@@ -1035,6 +1035,22 @@ if (gotTheLock) {
     setupIpcHandlers();
     createHudWindow();
 
+    // Speaky -> Dictori: migrate old model ids to their current catalog equivalents
+    try {
+      const s = storage.getSettings();
+      const idMap: Record<string, string> = {
+        'parakeet-v3-q4': 'parakeet-v3-q5',
+        'whisper-small-q5': 'whisper-small-q6'
+      };
+      const mapped = s.localModelId ? idMap[s.localModelId] : undefined;
+      if (mapped) {
+        storage.updateSettings({ localModelId: mapped });
+        console.log(`[Migration] localModelId: ${s.localModelId} -> ${mapped}`);
+      }
+    } catch (err) {
+      console.warn('[Migration] model id migration failed:', err);
+    }
+
     const settings = storage.getSettings();
 
     // Show settings window on manual launch; keep quiet only on system boot autostart
