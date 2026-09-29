@@ -82,7 +82,7 @@ export const ModelsTab: React.FC<ModelsTabProps> = ({ settings, onChange }) => {
     setProgress((prev) => ({ ...prev, [modelId]: { state: 'downloading', percent: 0 } }));
     const res = await window.speakyAPI?.downloadModel?.(modelId);
     if (res && !res.ok) {
-      setModelError(res.error || 'Ошибка скачивания');
+      setModelError(res.error || t.downloadError);
       setProgress((prev) => ({ ...prev, [modelId]: { state: 'error' } }));
       refreshCatalog();
     }
@@ -91,7 +91,7 @@ export const ModelsTab: React.FC<ModelsTabProps> = ({ settings, onChange }) => {
   const handleRemove = async (modelId: string) => {
     const res = await window.speakyAPI?.removeModel?.(modelId);
     if (res && !res.ok) {
-      setModelError(res.error || 'Ошибка удаления');
+      setModelError(res.error || t.removeError);
     }
     // If the removed model was the active local one, clear the selection
     if (settings.provider === 'local' && settings.localModelId === modelId) {
@@ -120,7 +120,7 @@ export const ModelsTab: React.FC<ModelsTabProps> = ({ settings, onChange }) => {
     const res = await window.speakyAPI?.pickModelFolder?.(shape);
     if (!res) return;
     if (!res.detectedEngine) {
-      setModelError('Не удалось определить модель: нужен файл *.gguf или *.bin (или папка с таким файлом)');
+      setModelError(t.pickModelError);
       return;
     }
     setDraftFolder(res);
@@ -137,7 +137,7 @@ export const ModelsTab: React.FC<ModelsTabProps> = ({ settings, onChange }) => {
       engine: draftFolder.detectedEngine || 'transcribe.cpp'
     });
     if (res && !res.ok) {
-      setModelError(res.error || 'Ошибка подключения папки');
+      setModelError(res.error || t.registerError);
       return;
     }
     setDraftFolder(null);
@@ -196,9 +196,9 @@ export const ModelsTab: React.FC<ModelsTabProps> = ({ settings, onChange }) => {
           <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
             <HardDrive className="w-3.5 h-3.5" /> {t.localModelsSection}
           </div>
-          <Button variant="secondary" onClick={() => setShapeChooser(true)} title="Подключить уже скачанную модель из любой папки">
+          <Button variant="secondary" onClick={() => setShapeChooser(true)} title={t.pickFolderTitle}>
             <FolderPlus className="w-3.5 h-3.5 inline mr-1 -mt-0.5" />
-            Из папки…
+            {t.fromFolder}
           </Button>
         </div>
 
@@ -206,14 +206,14 @@ export const ModelsTab: React.FC<ModelsTabProps> = ({ settings, onChange }) => {
         {draftFolder && (
           <div className="p-4 rounded-xl border border-indigo-500/50 bg-indigo-500/5 space-y-3">
             <div className="flex items-center gap-2 text-xs font-semibold text-zinc-100">
-              <FolderPlus className="w-4 h-4 text-indigo-300" /> Новая модель из папки
+              <FolderPlus className="w-4 h-4 text-indigo-300" /> {t.newModelFromFolder}
             </div>
             <p className="text-[11px] text-zinc-500 font-mono break-all">{draftFolder.path}</p>
             <div className="flex items-center gap-2 flex-wrap">
               <input
                 value={draftName}
                 onChange={(e) => setDraftName(e.target.value)}
-                placeholder="Название"
+                placeholder={t.namePlaceholder}
                 className="px-3 py-2 rounded-lg bg-zinc-800/80 border border-zinc-700/80 text-xs text-zinc-100 placeholder-zinc-600 focus:outline-none focus:border-indigo-500 min-w-40"
               />
               <span className="px-3 py-2 rounded-lg bg-zinc-800 border border-zinc-700 text-xs font-semibold text-zinc-300">
@@ -221,8 +221,8 @@ export const ModelsTab: React.FC<ModelsTabProps> = ({ settings, onChange }) => {
               </span>
             </div>
             <div className="flex items-center gap-2">
-              <Button variant="primary" onClick={handleRegisterFolder}>Подключить</Button>
-              <Button variant="ghost" onClick={() => setDraftFolder(null)}>Отмена</Button>
+              <Button variant="primary" onClick={handleRegisterFolder}>{t.connect}</Button>
+              <Button variant="ghost" onClick={() => setDraftFolder(null)}>{t.cancel}</Button>
             </div>
           </div>
         )}
@@ -238,7 +238,7 @@ export const ModelsTab: React.FC<ModelsTabProps> = ({ settings, onChange }) => {
               key={m.id}
               className={`p-4 rounded-xl border transition-all ${
                 isActiveLocal
-                  ? 'bg-zinc-900 border-indigo-500/70 ring-1 ring-indigo-500/40'
+                  ? 'bg-zinc-900 border-emerald-500/60 ring-1 ring-emerald-500/30'
                   : 'bg-zinc-900/70 border-zinc-800 hover:border-zinc-700'
               }`}
             >
@@ -257,27 +257,37 @@ export const ModelsTab: React.FC<ModelsTabProps> = ({ settings, onChange }) => {
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="text-xs font-semibold text-zinc-100">{m.name}</span>
                       <Badge tone="neutral">{engineLabel[m.engine]}</Badge>
-                      {m.isCustom && <Badge tone="accent"><Pencil className="w-3 h-3" /> своя</Badge>}
+                      {m.isCustom && <Badge tone="accent"><Pencil className="w-3 h-3" /> {t.customBadge}</Badge>}
                       <Badge tone={m.languages.includes('ru') ? 'accent' : 'neutral'}>
                         <LanguagesIcon className="w-3 h-3" />
                         {m.languages.join(', ')}
                       </Badge>
                       {m.installed && <Badge tone="success">{t.installedModel}</Badge>}
-                      {isActiveLocal && <Badge tone="accent">{t.activeModel}</Badge>}
+                      {isActiveLocal && <Badge tone="success">{t.activeModel}</Badge>}
                     </div>
                     <p className={`text-[11px] mt-1 leading-relaxed ${m.isCustom ? 'text-zinc-600 font-mono break-all line-clamp-2' : 'text-zinc-500 truncate'}`}>
-                      {m.description}
+                      {m.isCustom
+                        ? m.description
+                        : (m as any).id === 'gigaam-v3-q5'
+                        ? t.descGigaamQ5
+                        : (m as any).id === 'parakeet-v3-q5' || (m as any).id === 'parakeet-v3-q4'
+                        ? t.descParakeetQ5
+                        : (m as any).id === 'whisper-large-v3-turbo-q4'
+                        ? t.descWhisperTurbo
+                        : (m as any).id === 'whisper-small-q6' || (m as any).id === 'whisper-small-q5'
+                        ? t.descWhisperSmall
+                        : m.description}
                     </p>
                     {m.installed && m.sizeOnDiskMB !== undefined && (
                       <p className="text-[10px] text-zinc-600 mt-1 font-mono">
-                        {m.sizeOnDiskMB} МБ на диске
+                        {m.sizeOnDiskMB} {t.mbOnDisk}
                       </p>
                     )}
                   </div>
                 </div>
 
                 <div className="flex items-center gap-2 shrink-0">
-                  <span className="text-[10px] font-mono text-zinc-600">{m.sizeMB} МБ</span>
+                  <span className="text-[10px] font-mono text-zinc-600">{m.sizeMB} {t.mbSize}</span>
                   {isDownloading ? (
                     <span className="text-[10px] text-indigo-300 font-semibold flex items-center gap-1">
                       <Loader2 className="w-3 h-3 animate-spin" />
@@ -293,14 +303,14 @@ export const ModelsTab: React.FC<ModelsTabProps> = ({ settings, onChange }) => {
                       <Button
                         variant="danger"
                         onClick={() => handleRemove(m.id)}
-                        title={m.isCustom ? 'Отключить папку (файлы не удаляются)' : t.removeModel}
+                        title={m.isCustom ? t.unregisterFolderTitle : t.removeModel}
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </Button>
                     </>
                   ) : m.isCustom ? (
                     <Button variant="danger" onClick={() => handleRemove(m.id)}>
-                      Отключить
+                      {t.disconnect}
                     </Button>
                   ) : (
                     <Button variant="secondary" onClick={() => handleDownload(m.id)}>
@@ -363,8 +373,7 @@ export const ModelsTab: React.FC<ModelsTabProps> = ({ settings, onChange }) => {
                 </div>
 
                 <div className="flex items-center gap-2.5 shrink-0">
-                  <div className="flex flex-col items-end gap-1">
-                    <Badge tone={isSelected ? 'accent' : 'neutral'}>{p.tag}</Badge>
+                  <div className="flex flex-col items-end gap-1">                      <Badge tone={isSelected ? 'accent' : 'neutral'}>{p.tag}</Badge>
                     <span className="text-[10px] font-mono text-zinc-600">{p.latency}</span>
                   </div>
                   <div
@@ -460,7 +469,7 @@ export const ModelsTab: React.FC<ModelsTabProps> = ({ settings, onChange }) => {
             </div>
             <div>
               <div className="text-xs font-semibold text-zinc-100">
-                {models.find((m) => m.id === settings.localModelId)?.name || 'Локальная модель'}
+                {models.find((m) => m.id === settings.localModelId)?.name || t.localModelFallback}
               </div>
               <div className="text-[11px] text-zinc-500">{t.localDesc}</div>
             </div>
@@ -483,8 +492,8 @@ export const ModelsTab: React.FC<ModelsTabProps> = ({ settings, onChange }) => {
                 <FolderPlus className="w-4.5 h-4.5" />
               </div>
               <div>
-                <div className="text-sm font-semibold text-zinc-100">Подключение модели</div>
-                <div className="text-xs text-zinc-400">Один файл модели или папка, в которой он лежит.</div>
+                <div className="text-sm font-semibold text-zinc-100">{t.connectModelTitle}</div>
+                <div className="text-xs text-zinc-400">{t.connectModelDesc}</div>
               </div>
             </div>
 
@@ -494,8 +503,8 @@ export const ModelsTab: React.FC<ModelsTabProps> = ({ settings, onChange }) => {
             >
               <FileAudio className="w-4.5 h-4.5 text-zinc-400 group-hover:text-indigo-300 transition-colors shrink-0" />
               <div className="flex-1">
-                <div className="text-xs font-semibold text-zinc-100">Файл модели</div>
-                <div className="text-[11px] text-zinc-400">*.gguf или *.bin</div>
+                <div className="text-xs font-semibold text-zinc-100">{t.modelFile}</div>
+                <div className="text-[11px] text-zinc-400">{t.modelFileHint}</div>
               </div>
               <ArrowRight className="w-4 h-4 text-zinc-600 group-hover:text-indigo-300 group-hover:translate-x-0.5 transition-all" />
             </button>
@@ -506,8 +515,8 @@ export const ModelsTab: React.FC<ModelsTabProps> = ({ settings, onChange }) => {
             >
               <Folder className="w-4.5 h-4.5 text-zinc-400 group-hover:text-indigo-300 transition-colors shrink-0" />
               <div className="flex-1">
-                <div className="text-xs font-semibold text-zinc-100">Папка с моделью</div>
-                <div className="text-[11px] text-zinc-400">модель внутри папки</div>
+                <div className="text-xs font-semibold text-zinc-100">{t.modelFolder}</div>
+                <div className="text-[11px] text-zinc-400">{t.modelFolderHint}</div>
               </div>
               <ArrowRight className="w-4 h-4 text-zinc-600 group-hover:text-indigo-300 group-hover:translate-x-0.5 transition-all" />
             </button>
@@ -516,7 +525,7 @@ export const ModelsTab: React.FC<ModelsTabProps> = ({ settings, onChange }) => {
               onClick={() => setShapeChooser(false)}
               className="w-full py-2 text-xs text-zinc-500 hover:text-zinc-200 transition-colors cursor-pointer"
             >
-              Отмена
+              {t.cancel}
             </button>
           </div>
         </div>

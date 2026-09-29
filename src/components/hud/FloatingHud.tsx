@@ -118,7 +118,7 @@ export const FloatingHud: React.FC = () => {
       console.error('[HUD] Error starting recording:', err);
       isRecordingRef.current = false;
       setHudState('error');
-      setErrorMessage(err?.message || 'Ошибка микрофона');
+      setErrorMessage(err?.message || t.hudMicError);
       window.speakyAPI?.notifyRecordingStopped?.();
       scheduleDismiss(2500);
     } finally {
@@ -169,20 +169,20 @@ export const FloatingHud: React.FC = () => {
         } else {
           soundEffects.playError();
           setHudState('error');
-          const cleanErr = (result.error || 'Ошибка распознавания').replace(/^Error invoking remote method '[^']+':\s*(Error:\s*)?/, '');
+          const cleanErr = (result.error || t.hudRecognizeError).replace(/^Error invoking remote method '[^']+':\s*(Error:\s*)?/, '');
           setErrorMessage(cleanErr);
           scheduleDismiss(2500);
         }
       } else {
         setHudState('success');
-        setTextSnippet('Демо-режим: API недоступен');
+        setTextSnippet(t.hudDemoMode);
         scheduleDismiss(1200);
       }
     } catch (err: any) {
       console.error('[HUD] Error stopping recording:', err);
       soundEffects.playError();
       setHudState('error');
-      const cleanErr = (err?.message || 'Ошибка обработки').replace(/^Error invoking remote method '[^']+':\s*(Error:\s*)?/, '');
+      const cleanErr = (err?.message || t.hudProcessError).replace(/^Error invoking remote method '[^']+':\s*(Error:\s*)?/, '');
       setErrorMessage(cleanErr);
       scheduleDismiss(2500);
     } finally {
@@ -445,7 +445,7 @@ export const FloatingHud: React.FC = () => {
             onMouseDown={(e) => e.stopPropagation()}
             onClick={handleCancelRecording}
             className="app-no-drag wispr-circle-btn cursor-pointer relative z-10"
-            title="Отменить (Esc)"
+            title={t.hudCancelTitle}
           >
             <X className="w-3.5 h-3.5 stroke-[2.5] pointer-events-none" />
           </button>
@@ -498,7 +498,7 @@ export const FloatingHud: React.FC = () => {
             onMouseDown={(e) => e.stopPropagation()}
             onClick={handleConfirmRecording}
             className="app-no-drag wispr-circle-btn cursor-pointer relative z-10"
-            title={hudState === 'recording' ? "Завершить и вставить (Ctrl + ~)" : hudState === 'success' ? "Готово (закрыть)" : "Начать запись"}
+            title={hudState === 'recording' ? t.hudFinishTitle : hudState === 'success' ? t.hudDoneTitle : t.hudRecordTitle}
           >
             {hudState === 'processing' ? (
               <Loader2 className="w-3.5 h-3.5 animate-spin text-white pointer-events-none" />
@@ -512,7 +512,7 @@ export const FloatingHud: React.FC = () => {
       {/* Developer / Browser Preview Controls (only rendered in browser when window.speakyAPI is absent) */}
       {typeof window !== 'undefined' && !window.speakyAPI && (
         <div className="fixed bottom-8 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-neutral-900/90 border border-white/20 rounded-full px-3.5 py-1.5 shadow-2xl backdrop-blur-md z-50 select-none">
-          <span className="text-neutral-400 font-mono text-[10px] mr-1">Тест HUD:</span>
+          <span className="text-neutral-400 font-mono text-[10px] mr-1">{t.hudTestLabel}</span>
           <button
             id="test-btn-idle"
             onClick={() => { setHudState('idle'); setIsVisible(true); setMockVoicing(false); }}
@@ -520,7 +520,7 @@ export const FloatingHud: React.FC = () => {
               hudState === 'idle' ? 'bg-sky-500 text-white shadow-sm' : 'bg-white/10 text-neutral-300 hover:bg-white/20'
             }`}
           >
-            Готов
+            {t.hudStateReady}
           </button>
           <button
             id="test-btn-recording"
@@ -529,7 +529,7 @@ export const FloatingHud: React.FC = () => {
               hudState === 'recording' && mockVoicing ? 'bg-sky-500 text-white shadow-sm' : 'bg-white/10 text-neutral-300 hover:bg-white/20'
             }`}
           >
-            Запись + Речь
+            {t.hudStateRecording}
           </button>
           <button
             id="test-btn-processing"
@@ -538,13 +538,13 @@ export const FloatingHud: React.FC = () => {
               hudState === 'processing' ? 'bg-sky-500 text-white shadow-sm' : 'bg-white/10 text-neutral-300 hover:bg-white/20'
             }`}
           >
-            Обработка
+            {t.hudStateProcessing}
           </button>
           <button
             id="test-btn-success"
             onClick={() => {
               setHudState('success');
-              setTextSnippet('Привет! Всё отлично работает.');
+              setTextSnippet('Demo OK');
               setLatency(190);
               setIsVisible(true);
             }}
@@ -552,7 +552,7 @@ export const FloatingHud: React.FC = () => {
               hudState === 'success' ? 'bg-emerald-500 text-white shadow-sm' : 'bg-white/10 text-neutral-300 hover:bg-white/20'
             }`}
           >
-            Успех
+            {t.hudStateSuccess}
           </button>
         </div>
       )}

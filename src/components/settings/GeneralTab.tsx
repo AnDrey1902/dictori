@@ -104,23 +104,23 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({ settings, onChange }) =>
         </Select>
       </SettingRow>
 
-      {/* Keep whisper model warm */}
+      {/* Keep model in RAM */}
       {settings.provider === 'local' && (
         <SettingRow
           icon={HardDrive}
-          title="Держать whisper-модель в памяти"
-          desc="Фоновый whisper-server: повторные диктовки в 5–10 раз быстрее (без чтения модели с диска). Выгружается после простоя. Не влияет на transcribe.cpp — он всегда держит модель в RAM."
+          title={t.keepWarmTitle}
+          desc={t.keepWarmDesc}
         >
           <Select
             value={String(settings.whisperKeepWarmMinutes ?? 15)}
             onChange={(e) => onChange({ whisperKeepWarmMinutes: Number(e.target.value) })}
           >
-            <option value="0">Выключено (грузить каждый раз)</option>
-            <option value="5">5 минут</option>
-            <option value="15">15 минут (рекомендуется)</option>
-            <option value="30">30 минут</option>
-            <option value="60">1 час</option>
-            <option value="1440">Всегда (24 ч)</option>
+            <option value="0">{t.keepWarmOff}</option>
+            <option value="5">{t.keepWarm5}</option>
+            <option value="15">{t.keepWarm15}</option>
+            <option value="30">{t.keepWarm30}</option>
+            <option value="60">{t.keepWarm60}</option>
+            <option value="1440">{t.keepWarmAlways}</option>
           </Select>
         </SettingRow>
       )}
@@ -132,6 +132,7 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({ settings, onChange }) =>
           onChange={(accel) => onChange({ hotkey: accel })}
           avoid={[settings.translateHotkey || '']}
           placeholder="Ctrl+Space"
+          uiLanguage={settings.uiLanguage}
         />
       </SettingRow>
 

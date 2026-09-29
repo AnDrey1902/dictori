@@ -4,8 +4,8 @@
  */
 export const BRAND = {
   name: 'Speaky',
-  /** lowercase wordmark variant used in headers/titlebars */
-  wordmark: 'speaky',
+  /** titlebar wordmark — displayed in the brand display font */
+  wordmark: 'Speaky',
   tagline: 'печатайте со скоростью голоса',
   taglineEn: 'type at the speed of thought',
   appId: 'com.speaky.app',

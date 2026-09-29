@@ -225,6 +225,11 @@ export interface SpeakyAPI {
   installUpdate: () => Promise<any>;
   onUpdateStatusChanged: (callback: (status: any) => void) => () => void;
   getHarnessMetrics: () => Promise<any>;
+
+  /** App version from package.json (main process) */
+  getAppVersion: () => Promise<string>;
+  /** Open the bundled third-party licenses folder in Explorer */
+  openLicensesFolder: () => Promise<{ ok: boolean }>;
 }
 
 declare global {

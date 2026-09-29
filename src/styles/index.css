@@ -19,6 +19,21 @@
 .settings-shell {
   font-size: 117%;
 }
+
+/* Brand wordmark — Quaint HF (bundled locally, see assets/fonts/QuaintHF-README.txt).
+   Path resolves relative to this file so Vite fingerprints and bundles the font itself. */
+@font-face {
+  font-family: 'Quaint HF';
+  src: url('../../assets/fonts/QuaintHF.ttf') format('truetype');
+  font-weight: 400;
+  font-display: swap;
+}
+
+.brand-display {
+  font-family: 'Quaint HF', 'Poppins', 'Comfortaa', 'Inter', sans-serif;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+}
 .settings-shell .text-zinc-500,
 .settings-shell .text-zinc-400 {
   color: #b4b4bd;

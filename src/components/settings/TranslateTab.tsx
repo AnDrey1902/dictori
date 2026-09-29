@@ -10,15 +10,15 @@ interface TranslateTabProps {
   onChange: (updates: Partial<AppSettings>) => void;
 }
 
-const TARGET_LANGUAGES: { id: TranslateLanguage; label: string }[] = [
-  { id: 'en', label: '🇬🇧 Английский' },
-  { id: 'ru', label: '🇷🇺 Русский' },
-  { id: 'uk', label: '🇺🇦 Українська' },
-  { id: 'es', label: '🇪🇸 Испанский' },
-  { id: 'de', label: '🇩🇪 Немецкий' },
-  { id: 'fr', label: '🇫🇷 Французский' },
-  { id: 'it', label: '🇮🇹 Итальянский' },
-  { id: 'zh', label: '🇨🇳 Китайский' }
+const TARGET_LANGUAGES: { id: TranslateLanguage; labelKey: 'targetLangEn' | 'targetLangRu' | 'targetLangUk' | 'targetLangEs' | 'targetLangDe' | 'targetLangFr' | 'targetLangIt' | 'targetLangZh' }[] = [
+  { id: 'en', labelKey: 'targetLangEn' },
+  { id: 'ru', labelKey: 'targetLangRu' },
+  { id: 'uk', labelKey: 'targetLangUk' },
+  { id: 'es', labelKey: 'targetLangEs' },
+  { id: 'de', labelKey: 'targetLangDe' },
+  { id: 'fr', labelKey: 'targetLangFr' },
+  { id: 'it', labelKey: 'targetLangIt' },
+  { id: 'zh', labelKey: 'targetLangZh' }
 ];
 
 export const TranslateTab: React.FC<TranslateTabProps> = ({ settings, onChange }) => {
@@ -34,7 +34,7 @@ export const TranslateTab: React.FC<TranslateTabProps> = ({ settings, onChange }
         right={
           <Badge tone={enabled ? 'accent' : 'neutral'}>
             <Languages className="w-3 h-3" />
-            {enabled ? 'включён' : 'выключен'}
+            {enabled ? t.langOn : t.langOff}
           </Badge>
         }
       />
@@ -48,12 +48,13 @@ export const TranslateTab: React.FC<TranslateTabProps> = ({ settings, onChange }
       </SettingRow>
 
       <div className="grid grid-cols-2 gap-3">
-        <SettingRow icon={Keyboard} title={t.translateHotkeyLabel} desc="Отдельная от основной записи">
+        <SettingRow icon={Keyboard} title={t.translateHotkeyLabel} desc={t.translateHotkeyDesc}>
           <HotkeyInput
             value={settings.translateHotkey || ''}
             onChange={(accel) => onChange({ translateHotkey: accel })}
             avoid={[settings.hotkey]}
             placeholder="Ctrl+Shift+`"
+            uiLanguage={settings.uiLanguage}
           />
         </SettingRow>
 
@@ -64,7 +65,7 @@ export const TranslateTab: React.FC<TranslateTabProps> = ({ settings, onChange }
           >
             {TARGET_LANGUAGES.map((l) => (
               <option key={l.id} value={l.id}>
-                {l.label}
+                {t[l.labelKey]}
               </option>
             ))}
           </Select>
@@ -75,7 +76,7 @@ export const TranslateTab: React.FC<TranslateTabProps> = ({ settings, onChange }
         <div className="p-3 rounded-lg border border-amber-500/30 bg-amber-500/10 text-[11px] text-amber-300 flex items-start gap-2">
           <Info className="w-4 h-4 shrink-0 mt-0.5" />
           <span>
-            Переводу нужен LLM-ключ. Добавьте ключ Groq или OpenAI в разделе «{t.tabModels}».
+            {t.translateNeedsKey}
           </span>
         </div>
       )}
@@ -87,14 +88,14 @@ export const TranslateTab: React.FC<TranslateTabProps> = ({ settings, onChange }
         <Textarea
           value={
             settings.translatePrompt ||
-            'Переведи надиктованный текст на указанный целевой язык. Верни ТОЛЬКО перевод без пояснений.'
+            t.translatePromptDefault
           }
           onChange={(e) => onChange({ translatePrompt: e.target.value })}
           rows={5}
           className="font-mono text-[11px] leading-relaxed"
         />
         <p className="text-[10px] text-zinc-600">
-          Целевой язык подставляется автоматически («Целевой язык: …»). Изменения сохраняются сразу.
+          {t.translatePromptNote}
         </p>
       </div>
     </div>

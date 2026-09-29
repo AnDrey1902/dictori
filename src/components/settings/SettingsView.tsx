@@ -6,6 +6,7 @@ import {
   BookmarkCheck,
   History,
   Settings as SettingsIcon,
+  Info,
   Star
 } from 'lucide-react';
 import { SpeakyLogo } from '../common/SpeakyLogo';
@@ -15,12 +16,13 @@ import { PostprocessTab } from './PostprocessTab';
 import { TranslateTab } from './TranslateTab';
 import { SnippetsTab } from './SnippetsTab';
 import { HistoryTab } from './HistoryTab';
+import { AboutTab } from './AboutTab';
 import { AppSettings, TextSnippet, DictationHistoryItem, PromptTemplate } from '../../types';
 import { DEFAULT_PROMPTS } from '../../defaultPrompts';
 import { getTranslations } from '../../utils/i18n';
 import { BRAND } from '../../brand';
 
-type TabId = 'models' | 'postprocess' | 'translate' | 'snippets' | 'history' | 'general';
+type TabId = 'models' | 'postprocess' | 'translate' | 'snippets' | 'history' | 'general' | 'about';
 
 export const SettingsView: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabId>('models');
@@ -114,7 +116,8 @@ export const SettingsView: React.FC = () => {
     { id: 'translate', label: t.tabTranslate, icon: Languages },
     { id: 'snippets', label: t.tabSnippets, icon: BookmarkCheck },
     { id: 'history', label: t.tabHistory, icon: History },
-    { id: 'general', label: t.tabGeneral, icon: SettingsIcon }
+    { id: 'general', label: t.tabGeneral, icon: SettingsIcon },
+    { id: 'about', label: t.tabAbout, icon: Info }
   ];
 
   const tabButton = (tab: { id: TabId; label: string; icon: React.ElementType }) => {
@@ -142,7 +145,7 @@ export const SettingsView: React.FC = () => {
       <div className="h-14 bg-zinc-950 border-b border-zinc-800/80 flex items-center justify-between px-5 shrink-0 app-drag-region">
         <div className="flex items-center gap-3.5">
           <SpeakyLogo className="w-10 h-10" />
-          <span className="text-2xl font-bold tracking-tight text-zinc-100">
+          <span className="brand-display text-3xl leading-none text-zinc-100">
             {BRAND.wordmark}
           </span>
           {savedBadge && (
@@ -155,14 +158,14 @@ export const SettingsView: React.FC = () => {
           <button
             onClick={() => window.speakyAPI?.minimizeSettings?.()}
             className="w-7 h-7 rounded-md text-zinc-500 hover:text-zinc-200 hover:bg-zinc-800 flex items-center justify-center transition-colors cursor-pointer"
-            title="Свернуть"
+            title={t.minimizeTitle}
           >
             <svg width="10" height="10" viewBox="0 0 10 10"><path d="M1 5h8" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" /></svg>
           </button>
           <button
             onClick={() => window.speakyAPI?.closeSettings?.()}
             className="w-7 h-7 rounded-md text-zinc-500 hover:text-white hover:bg-rose-600 flex items-center justify-center transition-colors cursor-pointer"
-            title="Закрыть"
+            title={t.closeTitle}
           >
             <svg width="10" height="10" viewBox="0 0 10 10"><path d="M2 2l6 6M8 2l-6 6" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" /></svg>
           </button>
@@ -194,6 +197,7 @@ export const SettingsView: React.FC = () => {
           {activeTab === 'general' && (
             <GeneralTab settings={settings} onChange={handleUpdateSettings} />
           )}
+          {activeTab === 'about' && <AboutTab settings={settings} />}
           {activeTab === 'models' && <ModelsTab settings={settings} onChange={handleUpdateSettings} />}
           {activeTab === 'postprocess' && (
             <PostprocessTab

@@ -1,5 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Keyboard, Loader2, AlertCircle, CheckCircle2 } from 'lucide-react';
+import { getTranslations } from '../../utils/i18n';
+import { UILanguage } from '../../types';
 
 interface HotkeyInputProps {
   /** current accelerator, e.g. 'Ctrl+Shift+`' */
@@ -9,6 +11,8 @@ interface HotkeyInputProps {
   avoid?: string[];
   placeholder?: string;
   className?: string;
+  /** UI language for built-in messages (falls back to settings/auto) */
+  uiLanguage?: UILanguage;
 }
 
 const KEY_LABELS: Record<string, string> = {
@@ -71,7 +75,9 @@ export const HotkeyInput: React.FC<HotkeyInputProps> = ({
   avoid = [],
   placeholder = 'Ctrl+Space',
   className = '',
+  uiLanguage,
 }) => {
+  const t = getTranslations(uiLanguage);
   const [recording, setRecording] = useState(false);
   const [checking, setChecking] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -116,7 +122,7 @@ export const HotkeyInput: React.FC<HotkeyInputProps> = ({
       void (async () => {
         const { onChange: commit, avoid: avoidList } = propsRef.current;
         if (avoidList.filter(Boolean).includes(accel)) {
-          setError('Это сочетание уже занято другим действием Speaky');
+          setError(t.hotkeyTakenSelf);
           return;
         }
         setError(null);
@@ -125,7 +131,7 @@ export const HotkeyInput: React.FC<HotkeyInputProps> = ({
           try {
             const res = await window.speakyAPI.checkHotkey(accel);
             if (!res.available) {
-              setError(res.error || 'Сочетание занято системой');
+              setError(res.error || t.hotkeyTakenSystem);
               return;
             }
           } catch {
@@ -166,7 +172,7 @@ export const HotkeyInput: React.FC<HotkeyInputProps> = ({
               : 'border-zinc-700 bg-zinc-800 hover:border-zinc-600'
           }`}
           onMouseDown={startRecording}
-          title="Нажмите и задайте сочетание клавиш (Esc — отмена)"
+          title={t.hotkeyPressHint}
         >
           <Keyboard
             className={`w-3.5 h-3.5 absolute left-2 pointer-events-none ${
@@ -177,7 +183,7 @@ export const HotkeyInput: React.FC<HotkeyInputProps> = ({
             ref={inputRef}
             type="text"
             readOnly
-            value={recording ? 'Нажмите сочетание…' : value || ''}
+            value={recording ? t.hotkeyRecording : value || ''}
             placeholder={placeholder}
             className="w-36 px-3 py-1.5 pl-8 rounded-lg bg-transparent text-center font-mono text-xs font-bold text-zinc-100 placeholder-zinc-500 focus:outline-none cursor-pointer select-none"
           />
@@ -190,7 +196,7 @@ export const HotkeyInput: React.FC<HotkeyInputProps> = ({
       )}
       {!error && okFlash && (
         <span className="flex items-center gap-1 text-[10px] text-emerald-400">
-          <CheckCircle2 className="w-3 h-3" /> Сохранено
+          <CheckCircle2 className="w-3 h-3" /> {t.saved}
         </span>
       )}
     </div>

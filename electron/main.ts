@@ -956,6 +956,24 @@ function setupIpcHandlers() {
     return harness.observability.getMetricsSummary();
   });
 
+  ipcMain.handle('app:get-version', () => app.getVersion());
+
+  ipcMain.handle('app:open-licenses-folder', async () => {
+    const candidates = [
+      path.join(process.resourcesPath || '', 'transcribe', 'win-x64', 'licenses'),
+      path.join(__dirname, '..', 'resources', 'transcribe', 'win-x64', 'licenses')
+    ];
+    for (const dir of candidates) {
+      try {
+        if (fs.existsSync(dir)) {
+          await shell.openPath(dir);
+          return { ok: true };
+        }
+      } catch {}
+    }
+    return { ok: false };
+  });
+
   ipcMain.on('window:open-settings', () => createSettingsWindow());
   ipcMain.on('window:close-settings', () => settingsWindow?.close());
   ipcMain.on('window:minimize-settings', () => settingsWindow?.minimize());

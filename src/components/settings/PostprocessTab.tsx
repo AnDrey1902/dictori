@@ -86,8 +86,8 @@ export const PostprocessTab: React.FC<PostprocessTabProps> = ({
     },
     {
       id: 'openai-compatible',
-      name: 'OpenAI-совместимый',
-      model: settings.llmModels?.['openai-compatible'] || 'URL + модель',
+      name: t.openaiCompatibleName,
+      model: settings.llmModels?.['openai-compatible'] || t.urlAndModel,
       icon: Server,
       keySet: Boolean(settings.customLlmBaseUrl && settings.llmModels?.['openai-compatible'])
     }
@@ -139,7 +139,7 @@ export const PostprocessTab: React.FC<PostprocessTabProps> = ({
                 onClick={() => onChange({ llmProvider: opt.id })}
                 className={`p-4 rounded-xl border text-left transition-all cursor-pointer ${
                   isSelected
-                    ? 'bg-zinc-900 border-emerald-500/70 ring-1 ring-emerald-500/40'
+                    ? 'bg-zinc-900 border-indigo-500/70 ring-1 ring-indigo-500/40'
                     : 'bg-zinc-900/70 border-zinc-800 hover:border-zinc-700'
                 }`}
               >
@@ -148,7 +148,7 @@ export const PostprocessTab: React.FC<PostprocessTabProps> = ({
                     <div
                       className={`w-8 h-8 rounded-lg flex items-center justify-center border ${
                         isSelected
-                          ? 'bg-emerald-500 text-white border-emerald-500'
+                          ? 'bg-indigo-500 text-white border-indigo-500'
                           : 'bg-zinc-800 text-zinc-400 border-zinc-700/60'
                       }`}
                     >
@@ -162,7 +162,7 @@ export const PostprocessTab: React.FC<PostprocessTabProps> = ({
                   {opt.keySet ? (
                     <Badge tone="success">✓</Badge>
                   ) : (
-                    <Badge tone="warning">нет ключа</Badge>
+                    <Badge tone="warning">{t.noKey}</Badge>
                   )}
                 </div>
               </button>
@@ -179,12 +179,10 @@ export const PostprocessTab: React.FC<PostprocessTabProps> = ({
               </div>
               <div>
                 <div className="text-xs font-semibold text-zinc-100">
-                  {llmOptions.find((o) => o.id === activeProvider)?.name} — ключ и модель
+                  {llmOptions.find((o) => o.id === activeProvider)?.name} {t.llmKeyAndModel}
                 </div>
                 <span className="text-[11px] text-zinc-500">
-                  {activeProvider === 'openai-compatible'
-                    ? 'Любой OpenAI-совместимый сервер (Ollama, LM Studio, vLLM, OpenRouter…). Ключ можно не указывать.'
-                    : 'Ключ используется и для распознавания речи, где это применимо.'}
+                  {activeProvider === 'openai-compatible' ? t.llmCompatibleDesc : t.llmKeyAlsoForStt}
                 </span>
               </div>
             </div>
@@ -195,7 +193,7 @@ export const PostprocessTab: React.FC<PostprocessTabProps> = ({
                 rel="noreferrer"
                 className="text-xs text-zinc-300 font-semibold flex items-center gap-1.5 bg-zinc-800 hover:bg-zinc-700 px-3 py-1.5 rounded-lg transition-colors shrink-0"
               >
-                <span>Получить ключ</span>
+                <span>{t.getKey}</span>
                 <ExternalLink className="w-3.5 h-3.5 text-zinc-500" />
               </a>
             )}
@@ -215,7 +213,7 @@ export const PostprocessTab: React.FC<PostprocessTabProps> = ({
               type={showLlmKey ? 'text' : 'password'}
               value={llmKeyFor(activeProvider)}
               onChange={(e) => setLlmKeyFor(activeProvider, e.target.value.trim())}
-              placeholder={activeProvider === 'gemini' ? 'AIza...' : activeProvider === 'openai-compatible' ? 'sk-... (необязательно)' : 'API ключ'}
+              placeholder={activeProvider === 'gemini' ? 'AIza...' : activeProvider === 'openai-compatible' ? t.keyOptionalPlaceholder : t.apiKeyPlaceholder}
               className="font-mono !pr-9"
             />
             <button
@@ -231,17 +229,17 @@ export const PostprocessTab: React.FC<PostprocessTabProps> = ({
           <Input
             value={llmModelValue}
             onChange={(e) => handleModelChange(e.target.value.trim())}
-            placeholder={activeProvider === 'openai-compatible' ? 'Модель: llama3.2, gpt-4o-mini…' : defaultModelFor(activeProvider)}
+            placeholder={activeProvider === 'openai-compatible' ? t.modelPlaceholder : defaultModelFor(activeProvider)}
             className="font-mono"
           />
 
           <div className="flex items-center gap-1.5 text-[11px] text-zinc-600 pt-0.5">
             <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
-            <span>Ключ шифруется и хранится только локально.</span>
+            <span>{t.keyStoredLocally}</span>
           </div>
         </div>
         <p className="text-[11px] text-zinc-600">
-          При недоступности выбранного провайдера используется запасной (если настроен).
+          {t.fallbackProviderNote}
         </p>
       </section>
 
@@ -280,7 +278,7 @@ export const PostprocessTab: React.FC<PostprocessTabProps> = ({
                 key={p.id}
                 className={`p-4 rounded-xl border transition-all ${
                   isActive
-                    ? 'bg-zinc-900 border-emerald-500/70 ring-1 ring-emerald-500/40'
+                    ? 'bg-zinc-900 border-indigo-500/70 ring-1 ring-indigo-500/40'
                     : 'bg-zinc-900/70 border-zinc-800 hover:border-zinc-700'
                 }`}
               >
@@ -300,7 +298,7 @@ export const PostprocessTab: React.FC<PostprocessTabProps> = ({
                   </div>
                   <div className="flex items-center gap-1.5 shrink-0">
                     {!isActive && (
-                      <Button variant="success" onClick={() => onChange({ activePromptId: p.id })}>
+                      <Button variant="primary" onClick={() => onChange({ activePromptId: p.id })}>
                         {t.activatePrompt}
                       </Button>
                     )}
@@ -319,7 +317,7 @@ export const PostprocessTab: React.FC<PostprocessTabProps> = ({
                 />
                 <div className="flex justify-end mt-1.5">
                   <span className="text-[10px] text-zinc-600 flex items-center gap-1">
-                    <Save className="w-3 h-3" /> сохраняется автоматически
+                    <Save className="w-3 h-3" /> {t.savesAutomatically}
                   </span>
                 </div>
               </div>

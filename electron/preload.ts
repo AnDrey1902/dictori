@@ -119,7 +119,11 @@ const api = {
   },
 
   // Harness Observability & Metrics
-  getHarnessMetrics: () => ipcRenderer.invoke('harness:get-metrics')
+  getHarnessMetrics: () => ipcRenderer.invoke('harness:get-metrics'),
+
+  // App info
+  getAppVersion: (): Promise<string> => ipcRenderer.invoke('app:get-version'),
+  openLicensesFolder: (): Promise<{ ok: boolean }> => ipcRenderer.invoke('app:open-licenses-folder')
 };
 
 contextBridge.exposeInMainWorld('speakyAPI', api);

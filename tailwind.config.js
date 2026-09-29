@@ -30,7 +30,8 @@ module.exports = {
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
-        mono: ['JetBrains Mono', 'Fira Code', 'monospace']
+        mono: ['JetBrains Mono', 'Fira Code', 'monospace'],
+        display: ['Poppins', 'Comfortaa', 'Quicksand', 'Inter', 'sans-serif']
       },
       boxShadow: {
         'hud': '0 20px 50px rgba(0, 0, 0, 0.6), 0 0 30px rgba(99, 102, 241, 0.25)',

@@ -136,6 +136,7 @@ function getWorker(): Promise<Worker> {
 }
 
 function stopWorker(): void {
+  cancelEngineIdleUnload();
   if (worker) {
     const w = worker;
     worker = null;
@@ -143,6 +144,31 @@ function stopWorker(): void {
     w.postMessage({ type: 'close' });
     setTimeout(() => { try { w.terminate(); } catch {} }, 2000).unref?.();
   }
+}
+
+/* ── Idle unload of the transcribe.cpp model ───────────────────────── */
+
+let engineIdleTimer: NodeJS.Timeout | null = null;
+
+function cancelEngineIdleUnload(): void {
+  if (engineIdleTimer) { clearTimeout(engineIdleTimer); engineIdleTimer = null; }
+}
+
+/** Same policy as whisper-server: unload the model after keepWarm idle minutes.
+ *  0 = always cold (unload right after the dictation). */
+function armEngineIdleUnload(): void {
+  cancelEngineIdleUnload();
+  const minutes = keepWarmMinutes();
+  if (minutes <= 0) {
+    stopWorker();
+    return;
+  }
+  engineIdleTimer = setTimeout(() => {
+    engineIdleTimer = null;
+    if (pending) return; // a run is in flight — skip, rescheduled after it completes
+    stopWorker();
+  }, minutes * 60000);
+  (engineIdleTimer as any).unref?.();
 }
 
 /** Serialize engine ops: one open/run at a time (0.x library limitation anyway) */
@@ -175,6 +201,9 @@ async function transcribeWithTranscribeCpp(
       w.postMessage({ type: 'open', modelPath: modelFile, language });
       w.postMessage({ type: 'run', samples, seq: ++seqCounter });
     });
+
+    // Model stays in RAM for follow-up dictations; unloaded after idle timeout
+    armEngineIdleUnload();
 
     return { text: String(result.text || ''), backend: String(result.backend || '') };
   });

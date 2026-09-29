@@ -21,14 +21,14 @@ export const MODEL_CATALOG: ModelCatalogEntry[] = [
     requires: 'transcribe.cpp'
   },
   {
-    id: 'parakeet-v3-q4',
-    name: 'Parakeet TDT v3 (Q4_K_M)',
+    id: 'parakeet-v3-q5',
+    name: 'Parakeet TDT v3 (Q5_K_M)',
     engine: 'transcribe.cpp',
     huggingfaceId: 'handy-computer/parakeet-tdt-0.6b-v3-gguf',
-    hfFile: 'parakeet-tdt-0.6b-v3-Q4_K_M.gguf',
+    hfFile: 'parakeet-tdt-0.6b-v3-Q5_K_M.gguf',
     languages: ['ru', 'uk', 'multi'],
-    sizeMB: 463,
-    description: 'Мультиязычная (25 европейских языков, вкл. русский и украинский), с пунктуацией. Выбор для украинского.',
+    sizeMB: 549,
+    description: 'Мультиязычная (25 европейских языков, вкл. русский и украинский), с пунктуацией. Выбор для украинского. Очень быстрая — работает на GPU (Vulkan).',
     requires: 'transcribe.cpp'
   },
   {
@@ -38,19 +38,19 @@ export const MODEL_CATALOG: ModelCatalogEntry[] = [
     huggingfaceId: 'handy-computer/whisper-large-v3-turbo-gguf',
     hfFile: 'whisper-large-v3-turbo-Q4_K_M.gguf',
     languages: ['multi'],
-    sizeMB: 511,
-    description: 'Классика Whisper в компактном GGUF: ~100 языков и режим перевода, максимум точности.',
+    sizeMB: 536,
+    description: 'Классика Whisper в компактном GGUF: ~100 языков и режим перевода, максимум точности. CPU-only: Vulkan-бэкенд искажает whisper-модели.',
     requires: 'transcribe.cpp'
   },
   {
-    id: 'whisper-small-q5',
-    name: 'Whisper Small (q5_1)',
+    id: 'whisper-small-q6',
+    name: 'Whisper Small (Q6_K)',
     engine: 'transcribe.cpp',
-    huggingfaceId: 'ggerganov/whisper.cpp',
-    hfFile: 'ggml-small-q5_1.bin',
+    huggingfaceId: 'handy-computer/whisper-small-gguf',
+    hfFile: 'whisper-small-Q6_K.gguf',
     languages: ['multi'],
-    sizeMB: 181,
-    description: 'Мультиязычная (~99 языков) на едином движке transcribe.cpp. CPU-only: Vulkan-бэкенд искажает whisper-модели. Модель постоянно в RAM — без чтения с диска при каждой диктовке.',
+    sizeMB: 212,
+    description: 'Мультиязычная (~99 языков) на едином движке transcribe.cpp. CPU-only: Vulkan-бэкенд искажает whisper-модели. Компактный вариант для слабых ПК.',
     requires: 'transcribe.cpp'
   }
 ];
